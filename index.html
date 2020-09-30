@@ -169,10 +169,10 @@
         items.push({
           key: i + 1,
           ssn: chance.ssn(), // SSN as person ID
-          name: chance.name(),
-          email: chance.email(),
-          address: chance.address(),
-          phone: chance.phone(),
+          name: `${chance.natural({ min: 1, max: 9999 })}`,
+          email: `(${chance.natural({ min: 1, max: 5 })})` + `${chance.natural({ min: 1, max: 9 })}`,
+          address: `(${chance.natural({ min: 1, max: 5 })})` + `${chance.natural({ min: 1, max: 9 })}`,
+          phone: `(${chance.natural({ min: 1, max: 5 })})` + `${chance.natural({ min: 1, max: 9 })}`,
           selected: false,
         });
       }
