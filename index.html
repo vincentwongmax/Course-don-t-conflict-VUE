@@ -215,8 +215,83 @@
             } else {
               this.filteredItems = _.filter(this.items, function (v, k) {
                 return (
-                  !v.selected &&
-                  v.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+                  !v.selected && 
+                  ((v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1) ||
+                  (v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1) ||
+                  (v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1))
+                );
+                // (v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1);
+                // (v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1);
+              });
+            }
+            this.filteredItems.forEach(function (v, k) {
+              v.key = k + 1;
+            });
+            this.buildPagination();
+
+            if (_.isUndefined(currentPage)) {
+              this.selectPage(1);
+            } else {
+              this.selectPage(currentPage);
+            }
+          },
+          searchInTheList2(searchText, currentPage) {
+            if (_.isUndefined(searchText)) {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return !v.selected;
+              });
+
+              console.log('N1');
+            } else {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+
+                 if(v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
+                     v.selected = true
+                 }
+                 if(v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
+                     v.selected = true
+                 }
+                 if(v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
+                     v.selected = true
+                 }
+                return (
+                  !v.selected                  
+                );
+              });
+            }
+            this.filteredItems.forEach(function (v, k) {
+              v.key = k + 1;
+              console.log('N3');
+            });
+            this.buildPagination();
+
+            if (_.isUndefined(currentPage)) {
+              this.selectPage(1);
+            } else {
+              this.selectPage(currentPage);
+            }
+          },
+          searchInTheList3(searchText, currentPage) {
+            if (_.isUndefined(searchText)) {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return !v.selected;
+              });
+
+              console.log('N1');
+            } else {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+
+                 if(v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
+                     v.selected = false
+                 }
+                 if(v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
+                     v.selected = false
+                 }
+                 if(v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
+                     v.selected = false
+                 }
+                return (
+                  !v.selected                  
                 );
               });
             }
@@ -279,14 +354,19 @@
             });
           },
           selectItem(item) {
+            console.log(item);
             item.selected = true;
             this.selectedItems.push(item);
-            this.searchInTheList(this.searchItem, this.pagination.currentPage);
+            this.searchInTheList2(item.email,1)
+            this.searchInTheList2(item.address,1)
+            this.searchInTheList2(item.phone,1)
           },
           removeSelectedItem(item) {
             item.selected = false;
             this.selectedItems.$remove(item);
-            this.searchInTheList(this.searchItem, this.pagination.currentPage);
+            this.searchInTheList3(item.email,1)
+            this.searchInTheList3(item.address,1)
+            this.searchInTheList3(item.phone,1)
           },
         },
       });
