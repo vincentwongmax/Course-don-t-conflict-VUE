@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Course</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.28/vue.min.js" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.4/chance.min.js" ></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js" ></script>
+<link href="https://cdn.bootcdn.net/ajax/libs/bulma/0.0.10/css/bulma.css" rel="stylesheet">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js" integrity="sha512-90vH1Z83AJY9DmlWa8WkjkV79yfS2n2Oxhsi2dZbIv0nC4E6m5AbH8Nh156kkM7JePmqD6tcZsfad1ueoaovww==" crossorigin="anonymous"></script>
+
+
+  </head>
+  <body>
+    <div id="app" class="container">
+      <h3 class="title is-3">Vue v1 Search and Pagination</h3>
+      <h5 class="subtitle is-5">
+        credit :
+        <a href="http://bulma.io/">bulma</a>,
+        <a href="https://vuejs.org/">vuejs</a>,
+        <a href="http://chancejs.com/">chancejs</a>,
+        <a href="http://lodash.com/">lodash</a>
+      </h5>
+      <div class="box m-form">
+        <label class="label">Search Person Name</label>
+        <div class="control is-grouped">
+          <p class="control is-expanded">
+            <input
+              class="input"
+              v-model="searchItem"
+              v-on:keyup="searchInTheList(searchItem)"
+              type="text"
+              placeholder="Find a person"
+            />
+            <span class="help is-dark"
+              ><strong>{{filteredItems.length | numeral}}</strong> of
+              {{items.length | numeral}} person found</span>
+          </p>
+          <p class="control">
+            <a
+              class="button is-info"
+              v-on:click="clearSearchItem"
+              v-bind:class="{'is-disabled': searchItem==''}"
+            >
+              Clear
+            </a>
+          </p>
+        </div>
+      </div>
+      <div class="box m-tags">
+        <span><strong>{{selectedItems.length}}</strong> person selected</span>
+        <div class="m-tags-items">
+          <a
+            v-for="item in selectedItems"
+            v-on:click="removeSelectedItem(item)"
+            class="tag is-dark is-small"
+          >
+            {{item.name}}
+            <button class="delete is-small"></button>
+          </a>
+        </div>
+      </div>
+      <nav class="pagination m-pagination">
+        <a
+          class="button"
+          v-on:click="selectPage(this.pagination.currentPage-1)"
+          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
+          >Previous</a
+        >
+        <a
+          class="button"
+          v-on:click="selectPage(this.pagination.currentPage+1)"
+          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
+          >Next page</a
+        >
+        <ul>
+          <li>
+            <a
+              class="button"
+              v-on:click="selectPage(pagination.items[0])"
+              v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
+            >
+              First
+            </a>
+          </li>
+          <li class="is-space"></li>
+          <li v-for="item in pagination.filteredItems">
+            <a
+              class="button"
+              v-on:click="selectPage(item)"
+              v-bind:class="{'is-info': item == pagination.currentPage}"
+              >{{item | numeral}}</a
+            >
+          </li>
+          <li class="is-space"></li>
+          <li>
+            <a
+              class="button"
+              v-on:click="selectPage(pagination.items[pagination.items.length-1])"
+              v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
+            >
+              Last
+            </a>
+          </li>
+        </ul>
+      </nav>
+      <div class="m-table">
+        <table class="table is-bordered is-striped is-narrow">
+          <tr>
+            <th class="m-table-index">#</th>
+            <th>Course</th>
+            <th>(一)</th>
+            <th>(二)</th>
+            <th>(三)</th>
+            <th></th>
+          </tr>
+          <tr v-for="item in paginatedItems">
+            <td>{{item.key}}</td>
+            <td>{{item.name}}</td>
+            <td>{{item.email}}</td>
+            <td>{{item.address}}</td>
+            <td>{{item.phone}}</td>
+            <td>
+              <a
+                class="button is-info is-outlined"
+                v-on:click="selectItem(item)"
+                >Select</a
+              >
+            </td>
+          </tr>
+        </table>
+      </div>
+    </div>
+
+    <style>
+      #app {
+        padding: 40px 0;
+      }
+      .m-pagination .is-space {
+        width: 20px;
+      }
+      .m-table {
+        margin-top: 20px;
+      }
+      .m-table tr th {
+        background: #c0c0c0;
+        color: #393939;
+      }
+      .m-table-index {
+        width: 20px;
+      }
+      .m-tags-items {
+        margin-top: 5px;
+        height: 60px;
+        overflow-y: scroll;
+      }
+      .m-tags-items .tag {
+        margin-bottom: 5px;
+        margin-right: 3px;
+      }
+    </style>
+
+    <script>
+      let items = [];
+      for (var i = 0; i < 10; i++) {
+        items.push({
+          key: i + 1,
+          ssn: chance.ssn(), // SSN as person ID
+          name: chance.name(),
+          email: chance.email(),
+          address: chance.address(),
+          phone: chance.phone(),
+          selected: false,
+        });
+      }
+
+      Vue.filter("numeral", function (value) {
+        return numeral(value).format("0,0");
+      });
+
+      new Vue({
+        el: "#app",
+        data: {
+          searchItem: "",
+          items: items,
+          filteredItems: [],
+          paginatedItems: [],
+          selectedItems: [],
+          pagination: {
+            range: 5,
+            currentPage: 1,
+            itemPerPage: 8,
+            items: [],
+            filteredItems: [],
+          },
+        },
+        ready() {
+          this.filteredItems = this.items;
+          this.buildPagination();
+          this.selectPage(1);
+        },
+        methods: {
+          clearSearchItem() {
+            this.searchItem = undefined;
+            this.searchInTheList("");
+          },
+          searchInTheList(searchText, currentPage) {
+            if (_.isUndefined(searchText)) {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return !v.selected;
+              });
+            } else {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return (
+                  !v.selected &&
+                  v.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+                );
+              });
+            }
+            this.filteredItems.forEach(function (v, k) {
+              v.key = k + 1;
+            });
+            this.buildPagination();
+
+            if (_.isUndefined(currentPage)) {
+              this.selectPage(1);
+            } else {
+              this.selectPage(currentPage);
+            }
+          },
+          buildPagination() {
+            let numberOfPage = Math.ceil(
+              this.filteredItems.length / this.pagination.itemPerPage
+            );
+            this.pagination.items = [];
+            for (var i = 0; i < numberOfPage; i++) {
+              this.pagination.items.push(i + 1);
+            }
+          },
+          selectPage(item) {
+            this.pagination.currentPage = item;
+
+            let start = 0;
+            let end = 0;
+            if (this.pagination.currentPage < this.pagination.range - 2) {
+              start = 1;
+              end = start + this.pagination.range - 1;
+            } else if (
+              this.pagination.currentPage <= this.pagination.items.length &&
+              this.pagination.currentPage >
+                this.pagination.items.length - this.pagination.range + 2
+            ) {
+              start = this.pagination.items.length - this.pagination.range + 1;
+              end = this.pagination.items.length;
+            } else {
+              start = this.pagination.currentPage - 2;
+              end = this.pagination.currentPage + 2;
+            }
+            if (start < 1) {
+              start = 1;
+            }
+            if (end > this.pagination.items.length) {
+              end = this.pagination.items.length;
+            }
+
+            this.pagination.filteredItems = [];
+            for (var i = start; i <= end; i++) {
+              this.pagination.filteredItems.push(i);
+            }
+
+            this.paginatedItems = this.filteredItems.filter((v, k) => {
+              return (
+                Math.ceil((k + 1) / this.pagination.itemPerPage) ==
+                this.pagination.currentPage
+              );
+            });
+          },
+          selectItem(item) {
+            item.selected = true;
+            this.selectedItems.push(item);
+            this.searchInTheList(this.searchItem, this.pagination.currentPage);
+          },
+          removeSelectedItem(item) {
+            item.selected = false;
+            this.selectedItems.$remove(item);
+            this.searchInTheList(this.searchItem, this.pagination.currentPage);
+          },
+        },
+      });
+    </script>
+
+
+
+
+
+  </body>
+</html>
