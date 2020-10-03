@@ -126,40 +126,39 @@
       </div>
       <nav class="pagination m-pagination">
         <a
-        class="button"
-        v-on:click="selectPage(pagination.items[0])"
-        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
-      >
-        First
-      </a>
+          class="button"
+          v-on:click="selectPage(pagination.items[0])"
+          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
+        >
+          First
+        </a>
         <a
           class="button"
           v-on:click="selectPage(this.pagination.currentPage-1)"
           v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
           >Previous</a
         >
-          <span v-for="item in pagination.filteredItems">
-            <a
-              class="button"
-              v-on:click="selectPage(item)"
-              v-bind:class="{'is-info': item == pagination.currentPage}"
-              >{{item | numeral}}</a
-            >
-          </span>
-            <a
-            class="button"
-            v-on:click="selectPage(this.pagination.currentPage+1)"
-            v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
-            >Next page</a
-          >
+        <span v-for="item in pagination.filteredItems">
           <a
+            class="button"
+            v-on:click="selectPage(item)"
+            v-bind:class="{'is-info': item == pagination.currentPage}"
+            >{{item | numeral}}</a
+          >
+        </span>
+        <a
+          class="button"
+          v-on:click="selectPage(this.pagination.currentPage+1)"
+          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
+          >Next page</a
+        >
+        <a
           class="button"
           v-on:click="selectPage(pagination.items[pagination.items.length-1])"
           v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
         >
           Last
         </a>
-        
       </nav>
       <div class="m-table">
         <table class="table is-bordered is-striped is-narrow">
@@ -265,7 +264,7 @@
           this.filteredItems = this.items;
           this.buildPagination();
           this.selectPage(1);
-  
+
         },
         methods: {
           clearSearchItem() {
@@ -296,7 +295,7 @@
             } else {
               this.filteredItems = _.filter(this.items, function (v, k) {
                 return (
-                  !v.selected 
+                  !v.selected
                 );
               });
             }
@@ -376,7 +375,7 @@
               this.filteredItems = _.filter(this.items, function (v, k) {
                 return !v.selected;
               });
-        
+
             } else {
               this.filteredItems = _.filter(this.items, function (v, k) {
                 if (
@@ -458,9 +457,15 @@
           selectItem(item) {
             item.selected = true;
             this.selectedItems.push(item);
-            this.searchInTheList2(item.email, 1);
-            this.searchInTheList2(item.address, 1);
-            this.searchInTheList2(item.phone, 1);
+            if(item.email !== 0 || item.email !== undefined  || tem.email !== ''){
+              this.searchInTheList2(item.email, 1);
+            }
+            if(item.address !== 0 || item.address !== undefined  || item.address !== ''){
+              this.searchInTheList2(item.address, 1);
+            }
+            if(item.phone !== 0 || item.phone !== undefined  || item.phone !== ''){
+              this.searchInTheList2(item.phone, 1);
+            }
           },
           removeSelectedItem(item) {
             item.selected = false;
