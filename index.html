@@ -4,23 +4,87 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Course</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.28/vue.min.js" ></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css" ></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.4/chance.min.js" ></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js" ></script>
-<link href="https://cdn.bootcdn.net/ajax/libs/bulma/0.0.10/css/bulma.css" rel="stylesheet">
-<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js" integrity="sha512-90vH1Z83AJY9DmlWa8WkjkV79yfS2n2Oxhsi2dZbIv0nC4E6m5AbH8Nh156kkM7JePmqD6tcZsfad1ueoaovww==" crossorigin="anonymous"></script>
-
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.28/vue.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.4/chance.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
+    <link
+      href="https://cdn.bootcdn.net/ajax/libs/bulma/0.0.10/css/bulma.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
+      crossorigin="anonymous"
+    />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"
+      integrity="sha512-90vH1Z83AJY9DmlWa8WkjkV79yfS2n2Oxhsi2dZbIv0nC4E6m5AbH8Nh156kkM7JePmqD6tcZsfad1ueoaovww=="
+      crossorigin="anonymous"
+    ></script>
   </head>
   <body>
     <div id="app" class="container">
       <h3 class="title is-3">選課不衝突神器</h3>
-      <h5 class="subtitle is-5">
-   
-      </h5>
+      <h5 class="subtitle is-5"></h5>
       <div class="box m-form">
+        <div class="control is-grouped">
+          <p class="control is-expanded">
+            <input
+              class="input"
+              v-model="lessonCode"
+              v-on:keyup="searchInTheList(searchItem)"
+              type="text"
+              placeholder="請輸入課程代號"
+            />
+          </p>
+
+          <p class="control is-expanded">
+            <input
+              class="input"
+              v-model="scheduleTime1"
+              v-on:keyup="searchInTheList(searchItem)"
+              type="text"
+              placeholder="請輸入第一節課"
+            />
+          </p>
+
+          <p class="control is-expanded">
+            <input
+              class="input"
+              v-model="scheduleTime2"
+              v-on:keyup="searchInTheList(searchItem)"
+              type="text"
+              placeholder="請輸入第二節課"
+            />
+          </p>
+
+          <p class="control is-expanded">
+            <input
+              class="input"
+              v-model="scheduleTime3"
+              v-on:keyup="searchInTheList(searchItem)"
+              type="text"
+              placeholder="請輸入第三節課"
+            />
+          </p>
+
+          <p class="control">
+            <a
+              class="button is-info"
+              v-on:click="submitCourse"
+              v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined || scheduleTime2== undefined  || scheduleTime3== undefined}"
+            >
+              提交
+            </a>
+          </p>
+        </div>
+
+        <div>
+          {{lessonCode}} {{scheduleTime1}} {{scheduleTime2}} {{scheduleTime3}}
+        </div>
+
         <label class="label">搜查課程代號</label>
         <div class="control is-grouped">
           <p class="control is-expanded">
@@ -33,7 +97,8 @@
             />
             <span class="help is-dark"
               ><strong>{{filteredItems.length | numeral}}</strong> of
-              {{items.length | numeral}} 筆資料</span>
+              {{items.length | numeral}} 筆資料</span
+            >
           </p>
           <p class="control">
             <a
@@ -61,47 +126,40 @@
       </div>
       <nav class="pagination m-pagination">
         <a
+        class="button"
+        v-on:click="selectPage(pagination.items[0])"
+        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
+      >
+        First
+      </a>
+        <a
           class="button"
           v-on:click="selectPage(this.pagination.currentPage-1)"
           v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
           >Previous</a
         >
-        <a
-          class="button"
-          v-on:click="selectPage(this.pagination.currentPage+1)"
-          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
-          >Next page</a
-        >
-        <ul>
-          <li>
-            <a
-              class="button"
-              v-on:click="selectPage(pagination.items[0])"
-              v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
-            >
-              First
-            </a>
-          </li>
-          <li class="is-space"></li>
-          <li v-for="item in pagination.filteredItems">
+          <span v-for="item in pagination.filteredItems">
             <a
               class="button"
               v-on:click="selectPage(item)"
               v-bind:class="{'is-info': item == pagination.currentPage}"
               >{{item | numeral}}</a
             >
-          </li>
-          <li class="is-space"></li>
-          <li>
+          </span>
             <a
-              class="button"
-              v-on:click="selectPage(pagination.items[pagination.items.length-1])"
-              v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
-            >
-              Last
-            </a>
-          </li>
-        </ul>
+            class="button"
+            v-on:click="selectPage(this.pagination.currentPage+1)"
+            v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
+            >Next page</a
+          >
+          <a
+          class="button"
+          v-on:click="selectPage(pagination.items[pagination.items.length-1])"
+          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
+        >
+          Last
+        </a>
+        
       </nav>
       <div class="m-table">
         <table class="table is-bordered is-striped is-narrow">
@@ -161,14 +219,20 @@
 
     <script>
       let items = [];
-      for (var i = 0; i < 10; i++) {
+      for (var i = 0; i < 50; i++) {
         items.push({
           key: i + 1,
           ssn: chance.ssn(), // SSN as person ID
           name: `${chance.natural({ min: 1, max: 9999 })}`,
-          email: `(${chance.natural({ min: 1, max: 5 })})` + `${chance.natural({ min: 1, max: 9 })}`,
-          address: `(${chance.natural({ min: 1, max: 5 })})` + `${chance.natural({ min: 1, max: 9 })}`,
-          phone: `(${chance.natural({ min: 1, max: 5 })})` + `${chance.natural({ min: 1, max: 9 })}`,
+          email:
+            `(${chance.natural({ min: 1, max: 5 })})` +
+            `${chance.natural({ min: 1, max: 9 })}`,
+          address:
+            `(${chance.natural({ min: 1, max: 5 })})` +
+            `${chance.natural({ min: 1, max: 9 })}`,
+          phone:
+            `(${chance.natural({ min: 1, max: 5 })})` +
+            `${chance.natural({ min: 1, max: 9 })}`,
           selected: false,
         });
       }
@@ -180,7 +244,11 @@
       new Vue({
         el: "#app",
         data: {
-          searchItem: "",
+          lessonCode: undefined,
+          scheduleTime1: undefined,
+          scheduleTime2: undefined,
+          scheduleTime3: undefined,
+          searchItem: undefined,
           items: items,
           filteredItems: [],
           paginatedItems: [],
@@ -197,12 +265,52 @@
           this.filteredItems = this.items;
           this.buildPagination();
           this.selectPage(1);
+  
         },
         methods: {
           clearSearchItem() {
             this.searchItem = undefined;
             this.searchInTheList("");
           },
+          submitCourse(){
+          items.push({
+          ssn: chance.ssn(), // SSN as person ID
+          name: this.lessonCode,
+          email: this.scheduleTime1,
+          address: this.scheduleTime2,
+          phone: this.scheduleTime3,
+          selected: false,
+        });
+            this.searchInTheList4(0,1);
+            this.lessonCode = undefined;
+            this.scheduleTime1 = undefined;
+            this.scheduleTime2 = undefined;
+            this.scheduleTime3 = undefined;
+          },
+          searchInTheList4(searchText, currentPage) {
+            if (_.isUndefined(searchText)) {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return !v.selected;
+              });
+            } else {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return (
+                  !v.selected 
+                );
+              });
+            }
+            this.filteredItems.forEach(function (v, k) {
+              v.key = k + 1;
+            });
+            this.buildPagination();
+
+            if (_.isUndefined(currentPage)) {
+              this.selectPage(1);
+            } else {
+              this.selectPage(currentPage);
+            }
+          },
+
           searchInTheList(searchText, currentPage) {
             if (_.isUndefined(searchText)) {
               this.filteredItems = _.filter(this.items, function (v, k) {
@@ -211,13 +319,14 @@
             } else {
               this.filteredItems = _.filter(this.items, function (v, k) {
                 return (
-                  !v.selected && 
-                  ((v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1) ||
-                  (v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1) ||
-                  (v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1))
+                  !v.selected &&
+                  (v.email.toLowerCase().indexOf(searchText.toLowerCase()) >
+                    -1 ||
+                    v.address.toLowerCase().indexOf(searchText.toLowerCase()) >
+                      -1 ||
+                    v.phone.toLowerCase().indexOf(searchText.toLowerCase()) >
+                      -1)
                 );
-                // (v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1);
-                // (v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1);
               });
             }
             this.filteredItems.forEach(function (v, k) {
@@ -236,28 +345,28 @@
               this.filteredItems = _.filter(this.items, function (v, k) {
                 return !v.selected;
               });
-
-              console.log('N1');
             } else {
               this.filteredItems = _.filter(this.items, function (v, k) {
-
-                 if(v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                     v.selected = true
-                 }
-                 if(v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                     v.selected = true
-                 }
-                 if(v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                     v.selected = true
-                 }
-                return (
-                  !v.selected                  
-                );
+                if (
+                  v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+                ) {
+                  v.selected = true;
+                }
+                if (
+                  v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+                ) {
+                  v.selected = true;
+                }
+                if (
+                  v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+                ) {
+                  v.selected = true;
+                }
+                return !v.selected;
               });
             }
             this.filteredItems.forEach(function (v, k) {
               v.key = k + 1;
-              console.log('N3');
             });
             this.buildPagination();
 
@@ -272,23 +381,25 @@
               this.filteredItems = _.filter(this.items, function (v, k) {
                 return !v.selected;
               });
-
-              console.log('N1');
+        
             } else {
               this.filteredItems = _.filter(this.items, function (v, k) {
-
-                 if(v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                     v.selected = false
-                 }
-                 if(v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                     v.selected = false
-                 }
-                 if(v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                     v.selected = false
-                 }
-                return (
-                  !v.selected                  
-                );
+                if (
+                  v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+                ) {
+                  v.selected = false;
+                }
+                if (
+                  v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+                ) {
+                  v.selected = false;
+                }
+                if (
+                  v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+                ) {
+                  v.selected = false;
+                }
+                return !v.selected;
               });
             }
             this.filteredItems.forEach(function (v, k) {
@@ -350,27 +461,21 @@
             });
           },
           selectItem(item) {
-            console.log(item);
             item.selected = true;
             this.selectedItems.push(item);
-            this.searchInTheList2(item.email,1)
-            this.searchInTheList2(item.address,1)
-            this.searchInTheList2(item.phone,1)
+            this.searchInTheList2(item.email, 1);
+            this.searchInTheList2(item.address, 1);
+            this.searchInTheList2(item.phone, 1);
           },
           removeSelectedItem(item) {
             item.selected = false;
             this.selectedItems.$remove(item);
-            this.searchInTheList3(item.email,1)
-            this.searchInTheList3(item.address,1)
-            this.searchInTheList3(item.phone,1)
+            this.searchInTheList3(item.email, 1);
+            this.searchInTheList3(item.address, 1);
+            this.searchInTheList3(item.phone, 1);
           },
         },
       });
     </script>
-
-
-
-
-
   </body>
 </html>
