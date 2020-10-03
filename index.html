@@ -287,6 +287,7 @@
             this.scheduleTime2 = undefined;
             this.scheduleTime3 = undefined;
           },
+
           searchInTheList4(searchText, currentPage) {
             if (_.isUndefined(searchText)) {
               this.filteredItems = _.filter(this.items, function (v, k) {
@@ -310,7 +311,6 @@
               this.selectPage(currentPage);
             }
           },
-
           searchInTheList(searchText, currentPage) {
             if (_.isUndefined(searchText)) {
               this.filteredItems = _.filter(this.items, function (v, k) {
@@ -320,12 +320,7 @@
               this.filteredItems = _.filter(this.items, function (v, k) {
                 return (
                   !v.selected &&
-                  (v.email.toLowerCase().indexOf(searchText.toLowerCase()) >
-                    -1 ||
-                    v.address.toLowerCase().indexOf(searchText.toLowerCase()) >
-                      -1 ||
-                    v.phone.toLowerCase().indexOf(searchText.toLowerCase()) >
-                      -1)
+                  v.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
                 );
               });
             }
