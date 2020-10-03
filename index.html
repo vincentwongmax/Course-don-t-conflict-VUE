@@ -74,7 +74,7 @@
             <a
               class="button is-info"
               v-on:click="submitCourse"
-              v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined || scheduleTime2== undefined  || scheduleTime3== undefined}"
+              v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }"
             >
               提交
             </a>
@@ -159,6 +159,12 @@
         >
           Last
         </a>
+        <a
+        class="button is-info is-outlined"
+        v-on:click="clearAllItem()"
+        >清除所有資料</a
+      >
+
       </nav>
       <div class="m-table">
         <table class="table is-bordered is-striped is-narrow">
@@ -169,6 +175,8 @@
             <th>第二節</th>
             <th>第三節</th>
             <th></th>
+
+        
           </tr>
           <tr v-for="item in paginatedItems">
             <td>{{item.key}}</td>
@@ -218,7 +226,7 @@
 
     <script>
       let items = [];
-      for (var i = 0; i < 50; i++) {
+      for (var i = 0; i < 10; i++) {
         items.push({
           key: i + 1,
           ssn: chance.ssn(), // SSN as person ID
@@ -272,14 +280,31 @@
             this.searchInTheList("");
           },
           submitCourse(){
-          items.push({
-          ssn: chance.ssn(), // SSN as person ID
-          name: this.lessonCode,
-          email: this.scheduleTime1,
-          address: this.scheduleTime2,
-          phone: this.scheduleTime3,
-          selected: false,
-        });
+
+          if(this.scheduleTime1 == undefined || this.scheduleTime1 == null || this.scheduleTime1 == '')
+          {
+            alert("至少輸入一節課表");
+            return ;
+          }
+         
+          if(this.scheduleTime2 == undefined || this.scheduleTime2 == null || this.scheduleTime2 == '')
+          {
+            this.scheduleTime2 = '****';
+          }
+
+          if(this.scheduleTime3 == undefined || this.scheduleTime3 == null || this.scheduleTime3 == '')
+          {
+            this.scheduleTime3 = '****';
+          }
+
+          this.items.push({
+            ssn: chance.ssn(), // SSN as person ID
+            name: this.lessonCode,
+            email: this.scheduleTime1,
+            address: this.scheduleTime2,
+            phone: this.scheduleTime3,
+            selected: false,
+          });
             this.searchInTheList4(0,1);
             this.lessonCode = undefined;
             this.scheduleTime1 = undefined;
@@ -454,18 +479,36 @@
               );
             });
           },
+          clearAllItem(){
+            this.items= [] ;
+            items= [];
+            this.searchInTheList4(0, 1);
+          },
           selectItem(item) {
+            console.log(item);
             item.selected = true;
             this.selectedItems.push(item);
-            if(item.email !== 0 || item.email !== undefined  || tem.email !== ''){
+            if(item.email != '****' ){
+              console.log('1');
               this.searchInTheList2(item.email, 1);
+            }else{
+              this.searchInTheList4(0, 1);
             }
-            if(item.address !== 0 || item.address !== undefined  || item.address !== ''){
+
+            if(item.address != '****'){
+              console.log('2');
               this.searchInTheList2(item.address, 1);
+            }else{
+              this.searchInTheList4(0, 1);
             }
-            if(item.phone !== 0 || item.phone !== undefined  || item.phone !== ''){
+
+            if(item.phone != '****'){
+              console.log('3');
               this.searchInTheList2(item.phone, 1);
-            }
+            }else{
+              this.searchInTheList4(0, 1);
+            } 
+
           },
           removeSelectedItem(item) {
             item.selected = false;
