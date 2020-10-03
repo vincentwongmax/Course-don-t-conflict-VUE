@@ -159,12 +159,9 @@
         >
           Last
         </a>
-        <a
-        class="button is-info is-outlined"
-        v-on:click="clearAllItem()"
-        >清除所有資料</a
-      >
-
+        <a class="button is-info is-outlined" v-on:click="clearAllItem()"
+          >清除所有資料</a
+        >
       </nav>
       <div class="m-table">
         <table class="table is-bordered is-striped is-narrow">
@@ -175,8 +172,6 @@
             <th>第二節</th>
             <th>第三節</th>
             <th></th>
-
-        
           </tr>
           <tr v-for="item in paginatedItems">
             <td>{{item.key}}</td>
@@ -272,40 +267,56 @@
           this.filteredItems = this.items;
           this.buildPagination();
           this.selectPage(1);
-
         },
         methods: {
           clearSearchItem() {
             this.searchItem = undefined;
             this.searchInTheList("");
           },
-          submitCourse(){
+          submitCourse() {
+            if (
+              this.lessonCode == undefined ||
+              this.lessonCode == null ||
+              this.lessonCode == ""
+            ) {
+              alert("請輸入課程代號");
+              return;
+            }
 
-          if(this.scheduleTime1 == undefined || this.scheduleTime1 == null || this.scheduleTime1 == '')
-          {
-            alert("至少輸入一節課表");
-            return ;
-          }
-         
-          if(this.scheduleTime2 == undefined || this.scheduleTime2 == null || this.scheduleTime2 == '')
-          {
-            this.scheduleTime2 = '****';
-          }
+            if (
+              this.scheduleTime1 == undefined ||
+              this.scheduleTime1 == null ||
+              this.scheduleTime1 == ""
+            ) {
+              alert("至少輸入一節課表");
+              return;
+            }
 
-          if(this.scheduleTime3 == undefined || this.scheduleTime3 == null || this.scheduleTime3 == '')
-          {
-            this.scheduleTime3 = '****';
-          }
+            if (
+              this.scheduleTime2 == undefined ||
+              this.scheduleTime2 == null ||
+              this.scheduleTime2 == ""
+            ) {
+              this.scheduleTime2 = "****";
+            }
 
-          this.items.push({
-            ssn: chance.ssn(), // SSN as person ID
-            name: this.lessonCode,
-            email: this.scheduleTime1,
-            address: this.scheduleTime2,
-            phone: this.scheduleTime3,
-            selected: false,
-          });
-            this.searchInTheList4(0,1);
+            if (
+              this.scheduleTime3 == undefined ||
+              this.scheduleTime3 == null ||
+              this.scheduleTime3 == ""
+            ) {
+              this.scheduleTime3 = "****";
+            }
+
+            this.items.push({
+              ssn: chance.ssn(), // SSN as person ID
+              name: this.lessonCode,
+              email: this.scheduleTime1,
+              address: this.scheduleTime2,
+              phone: this.scheduleTime3,
+              selected: false,
+            });
+            this.searchInTheList4(0, 1);
             this.lessonCode = undefined;
             this.scheduleTime1 = undefined;
             this.scheduleTime2 = undefined;
@@ -319,9 +330,7 @@
               });
             } else {
               this.filteredItems = _.filter(this.items, function (v, k) {
-                return (
-                  !v.selected
-                );
+                return !v.selected;
               });
             }
             this.filteredItems.forEach(function (v, k) {
@@ -400,7 +409,6 @@
               this.filteredItems = _.filter(this.items, function (v, k) {
                 return !v.selected;
               });
-
             } else {
               this.filteredItems = _.filter(this.items, function (v, k) {
                 if (
@@ -479,36 +487,35 @@
               );
             });
           },
-          clearAllItem(){
-            this.items= [] ;
-            items= [];
+          clearAllItem() {
+            this.items = [];
+            items = [];
             this.searchInTheList4(0, 1);
           },
           selectItem(item) {
             console.log(item);
             item.selected = true;
             this.selectedItems.push(item);
-            if(item.email != '****' ){
-              console.log('1');
+            if (item.email != "****") {
+              console.log("1");
               this.searchInTheList2(item.email, 1);
-            }else{
+            } else {
               this.searchInTheList4(0, 1);
             }
 
-            if(item.address != '****'){
-              console.log('2');
+            if (item.address != "****") {
+              console.log("2");
               this.searchInTheList2(item.address, 1);
-            }else{
+            } else {
               this.searchInTheList4(0, 1);
             }
 
-            if(item.phone != '****'){
-              console.log('3');
+            if (item.phone != "****") {
+              console.log("3");
               this.searchInTheList2(item.phone, 1);
-            }else{
+            } else {
               this.searchInTheList4(0, 1);
-            } 
-
+            }
           },
           removeSelectedItem(item) {
             item.selected = false;
