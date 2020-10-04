@@ -124,7 +124,7 @@
         v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}">
         Last
       </a>
-      <a class="button is-info is-outlined" v-on:click="clearAllItem()">清除所有資料</a>
+      <a class="button is-danger is-outlined" v-on:click="clearAllItem()">清除所有資料</a>
     </nav>
     <div class="m-table">
       <table class="table is-bordered is-striped is-narrow">
@@ -612,6 +612,9 @@
           }
           this.searchInTheList4(0, 1);
           alert("已增加資料");
+          document.getElementById('fileUploader').value = '';
+          XL_row_object = '';
+          
         },
       },
     });
