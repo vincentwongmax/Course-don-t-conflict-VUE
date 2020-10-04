@@ -457,6 +457,11 @@
               });
             } else {
               this.filteredItems = _.filter(this.items, function (v, k) {
+                console.log('v.address');
+                console.log(v.address);
+                
+                console.log('searchInTheList2 searchText');
+                console.log(typeof(searchText));
                 if (
                   v.email == searchText
                 ) {
@@ -592,6 +597,7 @@
             this.searchInTheList4(0, 1);
           },
           selectItem(item) {
+            console.log('logselectItems');
             console.log(item);
             item.selected = true;
             this.selectedItems.push(item);
@@ -629,10 +635,15 @@
             this.searchInTheList4(0, 1);
           },
           submitCourseExcel(){
-            console.log('done?');
 
           for (var i = 0; i < XL_row_object.length  ; i++) {
+            XL_row_object[i].課程代號 = String(XL_row_object[i].課程代號)
+            XL_row_object[i].課程名稱 = String(XL_row_object[i].課程名稱)
+            XL_row_object[i].第一節 = String(XL_row_object[i].第一節)
+            XL_row_object[i].第二節 = String(XL_row_object[i].第二節)
+            XL_row_object[i].第三節 = String(XL_row_object[i].第三節)
 
+          
             if (
               XL_row_object[i].課程代號 == undefined ||
               XL_row_object[i].課程代號 == null ||
