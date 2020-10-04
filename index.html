@@ -196,8 +196,6 @@
                 >Delete</a
               >
             </td>
-            
-
           </tr>
         </table>
       </div>
@@ -537,8 +535,8 @@
             this.searchInTheList3(item.phone, 1);
           },
           deleteItem(item){
-            console.log(item);
-            item.selected = true;
+            // item.selected = true;
+            this.items.shift(item);
             this.searchInTheList4(0, 1);
           },
         },
