@@ -43,6 +43,17 @@
           <p class="control is-expanded">
             <input
               class="input"
+              v-model="coursename"
+              v-on:keyup="searchInTheList(searchItem)"
+              type="text"
+              placeholder="課程名稱"
+            />
+          </p>
+
+
+          <p class="control is-expanded">
+            <input
+              class="input"
               v-model="scheduleTime1"
               v-on:keyup="searchInTheList(searchItem)"
               type="text"
@@ -73,7 +84,7 @@
           <p class="control">
             <a
               class="button is-info"
-              v-on:click="submitCourse"
+              v-on:click="submitCourse()"
               v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }"
             >
               提交
@@ -81,11 +92,21 @@
           </p>
         </div>
 
-        <span >
-          課程代號: <span style="color: rgb(255, 127, 148);">{{lessonCode}} </span >              第一節課: <span style="color: rgb(255, 127, 148);">{{scheduleTime1}}</span>              第二節課:  <span style="color: rgb(255, 127, 148);"> {{scheduleTime2}} </span>        第三節課:<span style="color: rgb(255, 127, 148);">{{scheduleTime3}}</span>
-        </span >
-        <br>
-<br>
+        <span>
+          課程代號:
+          <span style="color: rgb(255, 127, 148)">{{lessonCode}}</span>
+          課程名稱:
+          <span style="color: rgb(255, 127, 148)">{{coursename}}</span>
+          第一節課:
+          <span style="color: rgb(255, 127, 148)">{{scheduleTime1}}</span>
+          第二節課:
+          <span style="color: rgb(255, 127, 148)"> {{scheduleTime2}} </span>
+          第三節課:<span style="color: rgb(255, 127, 148)"
+            >{{scheduleTime3}}</span
+          >
+        </span>
+        <br />
+        <br />
         <label class="label">搜查課程代號</label>
         <div class="control is-grouped">
           <p class="control is-expanded">
@@ -169,16 +190,17 @@
           <tr>
             <th class="m-table-index">#</th>
             <th>課程代號</th>
+            <th>課程名稱</th>
             <th>第一節</th>
             <th>第二節</th>
             <th>第三節</th>
-            <th>選取</th>
-            <th>刪除</th>
-
+            <th>選取/刪除</th>
           </tr>
+          
           <tr v-for="item in paginatedItems">
             <td>{{item.key}}</td>
             <td>{{item.name}}</td>
+            <td>{{item.names}}</td>
             <td>{{item.email}}</td>
             <td>{{item.address}}</td>
             <td>{{item.phone}}</td>
@@ -188,10 +210,8 @@
                 v-on:click="selectItem(item)"
                 >Select</a
               >
-            </td>
-            <td>
               <a
-                class="button is-info is-outlined"
+                class="button is-danger is-outlined"
                 v-on:click="deleteItem(item)"
                 >Delete</a
               >
@@ -234,16 +254,17 @@
       for (var i = 0; i < 10; i++) {
         items.push({
           key: i + 1,
+          names :chance.sentence({ words: 3 }),
           ssn: chance.ssn(), // SSN as person ID
-          name: `${chance.natural({ min: 1, max: 9999 })}`,
+          name: `${chance.natural({ min: 1000, max: 9999 })}`,
           email:
-            `(${chance.natural({ min: 1, max: 5 })})` +
+            `(${chance.character({ pool: '一二三四五' })})` +
             `${chance.natural({ min: 1, max: 9 })}`,
           address:
-            `(${chance.natural({ min: 1, max: 5 })})` +
+          `(${chance.character({ pool: '一二三四五' })})` +
             `${chance.natural({ min: 1, max: 9 })}`,
           phone:
-            `(${chance.natural({ min: 1, max: 5 })})` +
+          `(${chance.character({ pool: '一二三四五' })})` +
             `${chance.natural({ min: 1, max: 9 })}`,
           selected: false,
         });
@@ -256,6 +277,7 @@
       new Vue({
         el: "#app",
         data: {
+          coursename: undefined,
           lessonCode: undefined,
           scheduleTime1: undefined,
           scheduleTime2: undefined,
@@ -277,6 +299,8 @@
           this.filteredItems = this.items;
           this.buildPagination();
           this.selectPage(1);
+
+          
         },
         methods: {
           clearSearchItem() {
@@ -292,6 +316,16 @@
               alert("請輸入課程代號");
               return;
             }
+            
+            if (
+              this.coursename == undefined ||
+              this.coursename == null ||
+              this.coursename == ""
+            ) {
+              alert("請輸入課程名稱");
+              return;
+            }
+
 
             if (
               this.scheduleTime1 == undefined ||
@@ -319,6 +353,7 @@
             }
 
             this.items.push({
+              names: this.coursename,
               ssn: chance.ssn(), // SSN as person ID
               name: this.lessonCode,
               email: this.scheduleTime1,
@@ -331,6 +366,7 @@
             this.scheduleTime1 = undefined;
             this.scheduleTime2 = undefined;
             this.scheduleTime3 = undefined;
+            this.coursename = undefined ;
           },
 
           searchInTheList4(searchText, currentPage) {
@@ -534,7 +570,7 @@
             this.searchInTheList3(item.address, 1);
             this.searchInTheList3(item.phone, 1);
           },
-          deleteItem(item){
+          deleteItem(item) {
             // item.selected = true;
             this.items.shift(item);
             this.searchInTheList4(0, 1);
