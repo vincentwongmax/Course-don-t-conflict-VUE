@@ -4,6 +4,9 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Course</title>
+    <script src="js/jquery.js"> </script>
+    <script lang="javascript" src="js/xlsx.full.min.js"></script>
+
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.28/vue.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.4/chance.min.js"></script>
@@ -28,8 +31,22 @@
     <div id="app" class="container">
       <h3 class="title is-3">選課不衝突神器</h3>
       <h5 class="subtitle is-5"></h5>
+
+      <input type="file" id="fileUploader" name="fileUploader" accept=".xls, .xlsx"/>   <a
+      class="button is-info"
+      v-on:click="submitCourseExcel()"
+     >
+      提交
+    </a>
+    </br></br>
+    JSON : <label id="jsonObject"> </label>
+
+
+
       <div class="box m-form">
         <div class="control is-grouped">
+          
+   
           <p class="control is-expanded">
             <input
               class="input"
@@ -269,6 +286,32 @@
           selected: false,
         });
       }
+      var XL_row_object = [];
+      $(document).ready(function(){
+              $("#fileUploader").change(function(evt){
+                    var selectedFile = evt.target.files[0];
+                    var reader = new FileReader();
+                    reader.onload = function(event) {
+                      var data = event.target.result;
+                      var workbook = XLSX.read(data, {
+                          type: 'binary'
+                      });
+                      workbook.SheetNames.forEach(function(sheetName) {
+                           XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+                          if (XL_row_object.length > 0) {
+                            document.getElementById("jsonObject").innerHTML = JSON.stringify(XL_row_object);
+                          }
+                          
+                        })
+                    };
+
+                    reader.onerror = function(event) {
+                      console.error("File could not be read! Code " + event.target.error.code);
+                    };
+
+                    reader.readAsBinaryString(selectedFile);
+              });
+        });
 
       Vue.filter("numeral", function (value) {
         return numeral(value).format("0,0");
@@ -298,9 +341,7 @@
         ready() {
           this.filteredItems = this.items;
           this.buildPagination();
-          this.selectPage(1);
-
-          
+          this.selectPage(1);             
         },
         methods: {
           clearSearchItem() {
@@ -574,6 +615,69 @@
             // item.selected = true;
             this.items.shift(item);
             this.searchInTheList4(0, 1);
+          },
+          submitCourseExcel(){
+            console.log('done?');
+
+          for (var i = 0; i < XL_row_object.length  ; i++) {
+
+            if (
+              XL_row_object[i].課程代號 == undefined ||
+              XL_row_object[i].課程代號 == null ||
+              XL_row_object[i].課程代號 == ""
+            ) {
+              alert("請輸入課程代號");
+              return ;
+            }
+
+            if (
+              XL_row_object[i].課程名稱 == undefined ||
+              XL_row_object[i].課程名稱 == null ||
+              XL_row_object[i].課程名稱 == ""
+            ) {
+              alert("請輸入課程名稱");
+              return ;
+            }
+
+            if (
+              XL_row_object[i].第一節 == undefined ||
+              XL_row_object[i].第一節 == null ||
+              XL_row_object[i].第一節 == ""
+            ) {
+              alert("至少輸入一節課程");
+              return ;
+            }
+
+            if (
+             XL_row_object[i].第二節 == undefined ||
+              XL_row_object[i].第二節 == null ||
+              XL_row_object[i].第二節 == ""
+            ) {
+              XL_row_object[i].第二節 = "****";
+            }
+
+            if (
+              XL_row_object[i].第三節 == undefined ||
+              XL_row_object[i].第三節 == null ||
+              XL_row_object[i].第三節 == ""
+            ) {
+              XL_row_object[i].第三節 = "****";
+            }
+
+
+        this.items.push({
+          key: i + 1,
+          names : XL_row_object[i].課程代號,
+          ssn: chance.ssn(), // SSN as person ID
+          name: XL_row_object[i].課程名稱,
+          email:XL_row_object[i].第一節,
+          address:XL_row_object[i].第二節,
+          phone:XL_row_object[i].第三節,
+          selected: false,
+        });
+      }
+      this.searchInTheList4(0, 1);
+
           },
         },
       });
