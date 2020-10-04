@@ -172,7 +172,9 @@
             <th>第一節</th>
             <th>第二節</th>
             <th>第三節</th>
-            <th></th>
+            <th>選取</th>
+            <th>刪除</th>
+
           </tr>
           <tr v-for="item in paginatedItems">
             <td>{{item.key}}</td>
@@ -187,6 +189,15 @@
                 >Select</a
               >
             </td>
+            <td>
+              <a
+                class="button is-info is-outlined"
+                v-on:click="deleteItem(item)"
+                >Delete</a
+              >
+            </td>
+            
+
           </tr>
         </table>
       </div>
@@ -524,6 +535,11 @@
             this.searchInTheList3(item.email, 1);
             this.searchInTheList3(item.address, 1);
             this.searchInTheList3(item.phone, 1);
+          },
+          deleteItem(item){
+            console.log(item);
+            item.selected = true;
+            this.searchInTheList4(0, 1);
           },
         },
       });
