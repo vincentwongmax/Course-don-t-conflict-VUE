@@ -1,0 +1,15 @@
+pop、push、shift和unshift這四種方法之中
+
+push() 方法   //+
+向陣列尾端新增一個或多個元素，並return新的長度
+
+pop() 方法   //- 最後的元素
+pop()和push()相反，作用為刪除陣列最後一個元素，把陣列長度減1，並return被刪除元素的值。若為空陣列，則該方法不改變陣列，return undefine。
+
+shift() 方法 //  - 開頭元素
+和unshift相法，是進行刪除陣列元素，同樣地:若陣列是空的則return undefine
+
+unshift() 方法  // + 開頭元素
+unshift則是向陣列的開頭新增一個或多個元素，並且return新的長度
+
+指定元素把變數放在()內
