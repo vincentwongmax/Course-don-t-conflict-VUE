@@ -101,7 +101,7 @@
       <span><strong>{{selectedItems.length}}</strong> 筆資料已選取</span>
       <div class="m-tags-items">
         <a v-for="item in selectedItems" v-on:click="removeSelectedItem(item)" class="tag is-dark is-small">
-          {{item.name}}
+          {{item.name}} {{item.names}}
           <button class="delete is-small"></button>
         </a>
       </div>
