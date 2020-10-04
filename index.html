@@ -1,656 +1,569 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Course</title>
-    <script src="js/jquery.js"> </script>
-    <script lang="javascript" src="js/xlsx.full.min.js"></script>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.28/vue.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.4/chance.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
-    <link
-      href="https://cdn.bootcdn.net/ajax/libs/bulma/0.0.10/css/bulma.css"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
-      integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN"
-      crossorigin="anonymous"
-    />
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"
-      integrity="sha512-90vH1Z83AJY9DmlWa8WkjkV79yfS2n2Oxhsi2dZbIv0nC4E6m5AbH8Nh156kkM7JePmqD6tcZsfad1ueoaovww=="
-      crossorigin="anonymous"
-    ></script>
-  </head>
-  <body>
-    <div id="app" class="container">
-      <h3 class="title is-3 ">選課不衝突神器</h3>
-      <h5 class="subtitle is-5"></h5>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course</title>
+  <script src="js/jquery.js"> </script>
+  <script lang="javascript" src="js/xlsx.full.min.js"></script>
 
-      <input type="file" id="fileUploader" name="fileUploader" accept=".xls, .xlsx"/>  
-      
-      <a
-      class="button is-info"
-      v-on:click="submitCourseExcel()"
-     >
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.28/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.4/chance.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
+  <link href="https://cdn.bootcdn.net/ajax/libs/bulma/0.0.10/css/bulma.css" rel="stylesheet" />
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"
+    integrity="sha512-90vH1Z83AJY9DmlWa8WkjkV79yfS2n2Oxhsi2dZbIv0nC4E6m5AbH8Nh156kkM7JePmqD6tcZsfad1ueoaovww=="
+    crossorigin="anonymous"></script>
+</head>
+
+<body>
+  <div id="app" class="container">
+    <h3 class="title is-3 ">選課不衝突神器</h3>
+    <h5 class="subtitle is-5"></h5>
+
+    <input type="file" id="fileUploader" name="fileUploader" accept=".xls, .xlsx" />
+
+    <a class="button is-info" v-on:click="submitCourseExcel()">
       提交
     </a>
     </br></br>
     <label id="jsonObject"> </label>
 
-      <div class="box m-form">
-        <div class="control is-grouped">
-          <p class="control is-expanded">
-            <input
-              class="input"
-              v-model="lessonCode"
-              v-on:keyup="searchInTheList(searchItem)"
-              type="text"
-              placeholder="請輸入課程代號"
-            />
-          </p>
+    <div class="box m-form">
+      <div class="control is-grouped">
+        <p class="control is-expanded">
+          <input class="input" v-model="lessonCode" v-on:keyup="searchInTheList(searchItem)" type="text"
+            placeholder="請輸入課程代號" />
+        </p>
 
-          <p class="control is-expanded">
-            <input
-              class="input"
-              v-model="coursename"
-              v-on:keyup="searchInTheList(searchItem)"
-              type="text"
-              placeholder="課程名稱"
-            />
-          </p>
+        <p class="control is-expanded">
+          <input class="input" v-model="coursename" v-on:keyup="searchInTheList(searchItem)" type="text"
+            placeholder="課程名稱" />
+        </p>
 
 
-          <p class="control is-expanded">
-            <input
-              class="input"
-              v-model="scheduleTime1"
-              v-on:keyup="searchInTheList(searchItem)"
-              type="text"
-              placeholder="請輸入第一節課"
-            />
-          </p>
+        <p class="control is-expanded">
+          <input class="input" v-model="scheduleTime1" v-on:keyup="searchInTheList(searchItem)" type="text"
+            placeholder="請輸入第一節課" />
+        </p>
 
-          <p class="control is-expanded">
-            <input
-              class="input"
-              v-model="scheduleTime2"
-              v-on:keyup="searchInTheList(searchItem)"
-              type="text"
-              placeholder="請輸入第二節課"
-            />
-          </p>
+        <p class="control is-expanded">
+          <input class="input" v-model="scheduleTime2" v-on:keyup="searchInTheList(searchItem)" type="text"
+            placeholder="請輸入第二節課" />
+        </p>
 
-          <p class="control is-expanded">
-            <input
-              class="input"
-              v-model="scheduleTime3"
-              v-on:keyup="searchInTheList(searchItem)"
-              type="text"
-              placeholder="請輸入第三節課"
-            />
-          </p>
+        <p class="control is-expanded">
+          <input class="input" v-model="scheduleTime3" v-on:keyup="searchInTheList(searchItem)" type="text"
+            placeholder="請輸入第三節課" />
+        </p>
 
-          <p class="control">
-            <a
-              class="button is-info"
-              v-on:click="submitCourse()"
-              v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }"
-            >
-              提交
-            </a>
-          </p>
-        </div>
-
-        <span>
-          課程代號:
-          <span style="color: rgb(255, 127, 148)">{{lessonCode}}</span>
-          課程名稱:
-          <span style="color: rgb(255, 127, 148)">{{coursename}}</span>
-          第一節課:
-          <span style="color: rgb(255, 127, 148)">{{scheduleTime1}}</span>
-          第二節課:
-          <span style="color: rgb(255, 127, 148)"> {{scheduleTime2}} </span>
-          第三節課:<span style="color: rgb(255, 127, 148)"
-            >{{scheduleTime3}}</span
-          >
-        </span>
-        <br />
-        <br />
-        <label class="label">搜查課程代號</label>
-        <div class="control is-grouped">
-          <p class="control is-expanded">
-            <input
-              class="input"
-              v-model="searchItem"
-              v-on:keyup="searchInTheList(searchItem)"
-              type="text"
-              placeholder="搜查課程代號"
-            />
-            <span class="help is-dark"
-              ><strong>{{filteredItems.length | numeral}}</strong> of
-              {{items.length | numeral}} 筆資料</span
-            >
-          </p>
-          <p class="control">
-            <a
-              class="button is-info"
-              v-on:click="clearSearchItem"
-              v-bind:class="{'is-disabled': searchItem==''}"
-            >
-              Clear
-            </a>
-          </p>
-        </div>
-      </div>
-      <div class="box m-tags">
-        <span><strong>{{selectedItems.length}}</strong> 筆資料已選取</span>
-        <div class="m-tags-items">
-          <a
-            v-for="item in selectedItems"
-            v-on:click="removeSelectedItem(item)"
-            class="tag is-dark is-small"
-          >
-            {{item.name}}
-            <button class="delete is-small"></button>
+        <p class="control">
+          <a class="button is-info" v-on:click="submitCourse()"
+            v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }">
+            提交
           </a>
-        </div>
+        </p>
       </div>
-      <nav class="pagination m-pagination">
-        <a
-          class="button"
-          v-on:click="selectPage(pagination.items[0])"
-          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
-        >
-          First
-        </a>
-        <a
-          class="button"
-          v-on:click="selectPage(this.pagination.currentPage-1)"
-          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}"
-          >Previous</a
-        >
-        <span v-for="item in pagination.filteredItems">
-          <a
-            class="button"
-            v-on:click="selectPage(item)"
-            v-bind:class="{'is-info': item == pagination.currentPage}"
-            >{{item | numeral}}</a
-          >
-        </span>
-        <a
-          class="button"
-          v-on:click="selectPage(this.pagination.currentPage+1)"
-          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
-          >Next page</a
-        >
-        <a
-          class="button"
-          v-on:click="selectPage(pagination.items[pagination.items.length-1])"
-          v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}"
-        >
-          Last
-        </a>
-        <a class="button is-info is-outlined" v-on:click="clearAllItem()"
-          >清除所有資料</a
-        >
-      </nav>
-      <div class="m-table">
-        <table class="table is-bordered is-striped is-narrow">
-          <tr>
-            <th class="m-table-index">#</th>
-            <th>課程代號</th>
-            <th>課程名稱</th>
-            <th>第一節</th>
-            <th>第二節</th>
-            <th>第三節</th>
-            <th>選取/刪除</th>
-          </tr>
-          
-          <tr v-for="item in paginatedItems">
-            <td>{{item.key}}</td>
-            <td>{{item.name}}</td>
-            <td>{{item.names}}</td>
-            <td>{{item.email}}</td>
-            <td>{{item.address}}</td>
-            <td>{{item.phone}}</td>
-            <td>
-              <a
-                class="button is-info is-outlined"
-                v-on:click="selectItem(item)"
-                >Select</a
-              >
-              <a
-                class="button is-danger is-outlined"
-                v-on:click="deleteItem(item)"
-                >Delete</a
-              >
-            </td>
-          </tr>
-        </table>
+
+      <span>
+        課程代號:
+        <span style="color: rgb(255, 127, 148)">{{lessonCode}}</span>
+        課程名稱:
+        <span style="color: rgb(255, 127, 148)">{{coursename}}</span>
+        第一節課:
+        <span style="color: rgb(255, 127, 148)">{{scheduleTime1}}</span>
+        第二節課:
+        <span style="color: rgb(255, 127, 148)"> {{scheduleTime2}} </span>
+        第三節課:<span style="color: rgb(255, 127, 148)">{{scheduleTime3}}</span>
+      </span>
+      <br />
+      <br />
+      <label class="label">搜查課程代號</label>
+      <div class="control is-grouped">
+        <p class="control is-expanded">
+          <input class="input" v-model="searchItem" v-on:keyup="searchInTheList(searchItem)" type="text"
+            placeholder="搜查課程代號" />
+          <span class="help is-dark"><strong>{{filteredItems.length | numeral}}</strong> of
+            {{items.length | numeral}} 筆資料</span>
+        </p>
+        <p class="control">
+          <a class="button is-info" v-on:click="clearSearchItem" v-bind:class="{'is-disabled': searchItem==''}">
+            Clear
+          </a>
+        </p>
       </div>
     </div>
+    <div class="box m-tags">
+      <span><strong>{{selectedItems.length}}</strong> 筆資料已選取</span>
+      <div class="m-tags-items">
+        <a v-for="item in selectedItems" v-on:click="removeSelectedItem(item)" class="tag is-dark is-small">
+          {{item.name}}
+          <button class="delete is-small"></button>
+        </a>
+      </div>
+    </div>
+    <nav class="pagination m-pagination">
+      <a class="button" v-on:click="selectPage(pagination.items[0])"
+        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}">
+        First
+      </a>
+      <a class="button" v-on:click="selectPage(this.pagination.currentPage-1)"
+        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}">Previous</a>
+      <span v-for="item in pagination.filteredItems">
+        <a class="button" v-on:click="selectPage(item)"
+          v-bind:class="{'is-info': item == pagination.currentPage}">{{item | numeral}}</a>
+      </span>
+      <a class="button" v-on:click="selectPage(this.pagination.currentPage+1)"
+        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}">Next
+        page</a>
+      <a class="button" v-on:click="selectPage(pagination.items[pagination.items.length-1])"
+        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}">
+        Last
+      </a>
+      <a class="button is-info is-outlined" v-on:click="clearAllItem()">清除所有資料</a>
+    </nav>
+    <div class="m-table">
+      <table class="table is-bordered is-striped is-narrow">
+        <tr>
+          <th class="m-table-index">#</th>
+          <th>課程代號</th>
+          <th>課程名稱</th>
+          <th>第一節</th>
+          <th>第二節</th>
+          <th>第三節</th>
+          <th>選取/刪除</th>
+        </tr>
 
-    <style>
-      #app {
-        padding: 40px 0;
-      }
-      .m-pagination .is-space {
-        width: 20px;
-      }
-      .m-table {
-        margin-top: 20px;
-      }
-      .m-table tr th {
-        background: #c0c0c0;
-        color: #393939;
-      }
-      .m-table-index {
-        width: 20px;
-      }
-      .m-tags-items {
-        margin-top: 5px;
-        height: 60px;
-        overflow-y: scroll;
-      }
-      .m-tags-items .tag {
-        margin-bottom: 5px;
-        margin-right: 3px;
-      }
-    </style>
+        <tr v-for="item in paginatedItems">
+          <td>{{item.key}}</td>
+          <td>{{item.name}}</td>
+          <td>{{item.names}}</td>
+          <td>{{item.email}}</td>
+          <td>{{item.address}}</td>
+          <td>{{item.phone}}</td>
+          <td>
+            <a class="button is-info is-outlined" v-on:click="selectItem(item)">Select</a>
+            <a class="button is-danger is-outlined" v-on:click="deleteItem(item)">Delete</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
 
-    <script>
-      let items = [];
-      for (var i = 0; i < 10; i++) {
-        items.push({
-          key: i + 1,
-          names :chance.sentence({ words: 3 }),
-          ssn: chance.ssn(), // SSN as person ID
-          name: `${chance.natural({ min: 1000, max: 9999 })}`,
-          email:
-            `(${chance.character({ pool: '一二三四五' })})` +
-            `${chance.natural({ min: 1, max: 9 })}`,
-          address:
+  <style>
+    #app {
+      padding: 40px 0;
+    }
+
+    .m-pagination .is-space {
+      width: 20px;
+    }
+
+    .m-table {
+      margin-top: 20px;
+    }
+
+    .m-table tr th {
+      background: #c0c0c0;
+      color: #393939;
+    }
+
+    .m-table-index {
+      width: 20px;
+    }
+
+    .m-tags-items {
+      margin-top: 5px;
+      height: 60px;
+      overflow-y: scroll;
+    }
+
+    .m-tags-items .tag {
+      margin-bottom: 5px;
+      margin-right: 3px;
+    }
+  </style>
+
+  <script>
+    let items = [];
+    for (var i = 0; i < 10; i++) {
+      items.push({
+        key: i + 1,
+        names: chance.sentence({ words: 3 }),
+        ssn: chance.ssn(), // SSN as person ID
+        name: `${chance.natural({ min: 1000, max: 9999 })}`,
+        email:
           `(${chance.character({ pool: '一二三四五' })})` +
-            `${chance.natural({ min: 1, max: 9 })}`,
-          phone:
+          `${chance.natural({ min: 1, max: 9 })}`,
+        address:
           `(${chance.character({ pool: '一二三四五' })})` +
-            `${chance.natural({ min: 1, max: 9 })}`,
-          selected: false,
-        });
-      }
-      var XL_row_object = [];
-      $(document).ready(function(){
-              $("#fileUploader").change(function(evt){
-                    var selectedFile = evt.target.files[0];
-                    var reader = new FileReader();
-                    reader.onload = function(event) {
-                      var data = event.target.result;
-                      var workbook = XLSX.read(data, {
-                          type: 'binary'
-                      });
-                      workbook.SheetNames.forEach(function(sheetName) {
-                           XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
-                          if (XL_row_object.length > 0) {
-                          //  document.getElementById("jsonObject").innerHTML = JSON.stringify(XL_row_object);
-                          }
-                        })
-                    };
-                    reader.onerror = function(event) {
-                      console.error("File could not be read! Code " + event.target.error.code);
-                    };
-                    reader.readAsBinaryString(selectedFile);
-              });
-        });
-
-      Vue.filter("numeral", function (value) {
-        return numeral(value).format("0,0");
+          `${chance.natural({ min: 1, max: 9 })}`,
+        phone:
+          `(${chance.character({ pool: '一二三四五' })})` +
+          `${chance.natural({ min: 1, max: 9 })}`,
+        selected: false,
       });
+    }
+    var XL_row_object = [];
+    $(document).ready(function () {
+      $("#fileUploader").change(function (evt) {
+        var selectedFile = evt.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function (event) {
+          var data = event.target.result;
+          var workbook = XLSX.read(data, {
+            type: 'binary'
+          });
+          workbook.SheetNames.forEach(function (sheetName) {
+            XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+            if (XL_row_object.length > 0) {
+              //  document.getElementById("jsonObject").innerHTML = JSON.stringify(XL_row_object);
+            }
+          })
+        };
+        reader.onerror = function (event) {
+          console.error("File could not be read! Code " + event.target.error.code);
+        };
+        reader.readAsBinaryString(selectedFile);
+      });
+    });
 
-      new Vue({
-        el: "#app",
-        data: {
-          coursename: undefined,
-          lessonCode: undefined,
-          scheduleTime1: undefined,
-          scheduleTime2: undefined,
-          scheduleTime3: undefined,
-          searchItem: undefined,
-          items: items,
+    Vue.filter("numeral", function (value) {
+      return numeral(value).format("0,0");
+    });
+
+    new Vue({
+      el: "#app",
+      data: {
+        coursename: undefined,
+        lessonCode: undefined,
+        scheduleTime1: undefined,
+        scheduleTime2: undefined,
+        scheduleTime3: undefined,
+        searchItem: undefined,
+        items: items,
+        filteredItems: [],
+        paginatedItems: [],
+        selectedItems: [],
+        pagination: {
+          range: 5,
+          currentPage: 1,
+          itemPerPage: 8,
+          items: [],
           filteredItems: [],
-          paginatedItems: [],
-          selectedItems: [],
-          pagination: {
-            range: 5,
-            currentPage: 1,
-            itemPerPage: 8,
-            items: [],
-            filteredItems: [],
-          },
         },
-        ready() {
-          this.filteredItems = this.items;
+      },
+      ready() {
+        this.filteredItems = this.items;
+        this.buildPagination();
+        this.selectPage(1);
+      },
+      methods: {
+        clearSearchItem() {
+          this.searchItem = undefined;
+          this.searchInTheList("");
+        },
+        submitCourse() {
+          if (
+            this.lessonCode == undefined ||
+            this.lessonCode == null ||
+            this.lessonCode == ""
+          ) {
+            alert("請輸入課程代號");
+            return;
+          }
+
+          if (
+            this.coursename == undefined ||
+            this.coursename == null ||
+            this.coursename == ""
+          ) {
+            alert("請輸入課程名稱");
+            return;
+          }
+
+
+          if (
+            this.scheduleTime1 == undefined ||
+            this.scheduleTime1 == null ||
+            this.scheduleTime1 == ""
+          ) {
+            alert("至少輸入一節課表");
+            return;
+          }
+
+          if (
+            this.scheduleTime2 == undefined ||
+            this.scheduleTime2 == null ||
+            this.scheduleTime2 == ""
+          ) {
+            this.scheduleTime2 = "****";
+          }
+
+          if (
+            this.scheduleTime3 == undefined ||
+            this.scheduleTime3 == null ||
+            this.scheduleTime3 == ""
+          ) {
+            this.scheduleTime3 = "****";
+          }
+
+          this.items.push({
+            names: this.coursename,
+            ssn: chance.ssn(), // SSN as person ID
+            name: this.lessonCode,
+            email: this.scheduleTime1,
+            address: this.scheduleTime2,
+            phone: this.scheduleTime3,
+            selected: false,
+          });
+          this.searchInTheList4(0, 1);
+          this.lessonCode = undefined;
+          this.scheduleTime1 = undefined;
+          this.scheduleTime2 = undefined;
+          this.scheduleTime3 = undefined;
+          this.coursename = undefined;
+        },
+
+        searchInTheList4(searchText, currentPage) {
+          if (_.isUndefined(searchText)) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
           this.buildPagination();
-          this.selectPage(1);             
+
+          if (_.isUndefined(currentPage)) {
+            this.selectPage(1);
+          } else {
+            this.selectPage(currentPage);
+          }
         },
-        methods: {
-          clearSearchItem() {
-            this.searchItem = undefined;
-            this.searchInTheList("");
-          },
-          submitCourse() {
-            if (
-              this.lessonCode == undefined ||
-              this.lessonCode == null ||
-              this.lessonCode == ""
-            ) {
-              alert("請輸入課程代號");
-              return;
-            }
-            
-            if (
-              this.coursename == undefined ||
-              this.coursename == null ||
-              this.coursename == ""
-            ) {
-              alert("請輸入課程名稱");
-              return;
-            }
-
-
-            if (
-              this.scheduleTime1 == undefined ||
-              this.scheduleTime1 == null ||
-              this.scheduleTime1 == ""
-            ) {
-              alert("至少輸入一節課表");
-              return;
-            }
-
-            if (
-              this.scheduleTime2 == undefined ||
-              this.scheduleTime2 == null ||
-              this.scheduleTime2 == ""
-            ) {
-              this.scheduleTime2 = "****";
-            }
-
-            if (
-              this.scheduleTime3 == undefined ||
-              this.scheduleTime3 == null ||
-              this.scheduleTime3 == ""
-            ) {
-              this.scheduleTime3 = "****";
-            }
-
-            this.items.push({
-              names: this.coursename,
-              ssn: chance.ssn(), // SSN as person ID
-              name: this.lessonCode,
-              email: this.scheduleTime1,
-              address: this.scheduleTime2,
-              phone: this.scheduleTime3,
-              selected: false,
+        searchInTheList(searchText, currentPage) {
+          if (_.isUndefined(searchText)) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
             });
-            this.searchInTheList4(0, 1);
-            this.lessonCode = undefined;
-            this.scheduleTime1 = undefined;
-            this.scheduleTime2 = undefined;
-            this.scheduleTime3 = undefined;
-            this.coursename = undefined ;
-          },
-
-          searchInTheList4(searchText, currentPage) {
-            if (_.isUndefined(searchText)) {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return !v.selected;
-              });
-            } else {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return !v.selected;
-              });
-            }
-            this.filteredItems.forEach(function (v, k) {
-              v.key = k + 1;
-            });
-            this.buildPagination();
-
-            if (_.isUndefined(currentPage)) {
-              this.selectPage(1);
-            } else {
-              this.selectPage(currentPage);
-            }
-          },
-          searchInTheList(searchText, currentPage) {
-            if (_.isUndefined(searchText)) {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return !v.selected;
-              });
-            } else {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return (
-                  !v.selected &&
-                  v.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
-                );
-              });
-            }
-            this.filteredItems.forEach(function (v, k) {
-              v.key = k + 1;
-            });
-            this.buildPagination();
-
-            if (_.isUndefined(currentPage)) {
-              this.selectPage(1);
-            } else {
-              this.selectPage(currentPage);
-            }
-          },
-          searchInTheList2(searchText, currentPage) {
-            if (_.isUndefined(searchText)) {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return !v.selected;
-              });
-            } else {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                console.log('v.address');
-                console.log(v.address);
-                
-                console.log('searchInTheList2 searchText');
-                console.log(typeof(searchText));
-                if (
-                  v.email == searchText
-                ) {
-                  v.selected = true;
-                }else if(v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                  v.selected = true;
-                }
-                
-                if (
-                  v.address == searchText
-                ) {
-                  v.selected = true;
-                }else if(v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                  v.selected = true;
-                }
-
-                if (
-                  v.phone == searchText
-                ) {
-                  v.selected = true;
-                }else if(v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                  v.selected = true;
-                }
-
-                return !v.selected;
-              });
-            }
-            this.filteredItems.forEach(function (v, k) {
-              v.key = k + 1;
-            });
-            this.buildPagination();
-
-            if (_.isUndefined(currentPage)) {
-              this.selectPage(1);
-            } else {
-              this.selectPage(currentPage);
-            }
-          },
-          searchInTheList3(searchText, currentPage) {
-            if (_.isUndefined(searchText)) {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return !v.selected;
-              });
-            } else {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                if (
-                  v.email == searchText
-                ) {
-                  v.selected = false;
-                }else if(v.email.indexOf(searchText) > -1){
-                  v.selected = false;
-                }
-
-                if (
-                  v.address== searchText
-                ) {
-                  v.selected = false;
-                }else if(v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                  v.selected = false;
-                }
-
-                if (
-                  v.phone == searchText
-                ) {
-                  v.selected = false;
-                }else if(v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1){
-                  v.selected = false;
-                }
-                return !v.selected;
-              });
-            }
-            this.filteredItems.forEach(function (v, k) {
-              v.key = k + 1;
-            });
-            this.buildPagination();
-
-            if (_.isUndefined(currentPage)) {
-              this.selectPage(1);
-            } else {
-              this.selectPage(currentPage);
-            }
-          },
-          buildPagination() {
-            let numberOfPage = Math.ceil(
-              this.filteredItems.length / this.pagination.itemPerPage
-            );
-            this.pagination.items = [];
-            for (var i = 0; i < numberOfPage; i++) {
-              this.pagination.items.push(i + 1);
-            }
-          },
-          selectPage(item) {
-            this.pagination.currentPage = item;
-
-            let start = 0;
-            let end = 0;
-            if (this.pagination.currentPage < this.pagination.range - 2) {
-              start = 1;
-              end = start + this.pagination.range - 1;
-            } else if (
-              this.pagination.currentPage <= this.pagination.items.length &&
-              this.pagination.currentPage >
-                this.pagination.items.length - this.pagination.range + 2
-            ) {
-              start = this.pagination.items.length - this.pagination.range + 1;
-              end = this.pagination.items.length;
-            } else {
-              start = this.pagination.currentPage - 2;
-              end = this.pagination.currentPage + 2;
-            }
-            if (start < 1) {
-              start = 1;
-            }
-            if (end > this.pagination.items.length) {
-              end = this.pagination.items.length;
-            }
-
-            this.pagination.filteredItems = [];
-            for (var i = start; i <= end; i++) {
-              this.pagination.filteredItems.push(i);
-            }
-
-            this.paginatedItems = this.filteredItems.filter((v, k) => {
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
               return (
-                Math.ceil((k + 1) / this.pagination.itemPerPage) ==
-                this.pagination.currentPage
+                !v.selected &&
+                v.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
               );
             });
-          },
-          clearAllItem() {
-            this.items = [];
-            items = [];
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined(currentPage)) {
+            this.selectPage(1);
+          } else {
+            this.selectPage(currentPage);
+          }
+        },
+        searchInTheList2(searchText, currentPage) {
+          if (_.isUndefined(searchText)) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              if (
+                v.email == searchText
+              ) {
+                v.selected = true;
+              } else if (v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
+                v.selected = true;
+              }
+
+              if (
+                v.address == searchText
+              ) {
+                v.selected = true;
+              } else if (v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
+                v.selected = true;
+              }
+
+              if (
+                v.phone == searchText
+              ) {
+                v.selected = true;
+              } else if (v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
+                v.selected = true;
+              }
+
+              return !v.selected;
+            });
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined(currentPage)) {
+            this.selectPage(1);
+          } else {
+            this.selectPage(currentPage);
+          }
+        },
+        searchInTheList3(searchText, currentPage) {
+          if (_.isUndefined(searchText)) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              if (
+                v.email == searchText
+              ) {
+                v.selected = false;
+              } else if (v.email.indexOf(searchText) > -1) {
+                v.selected = false;
+              }
+
+              if (
+                v.address == searchText
+              ) {
+                v.selected = false;
+              } else if (v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
+                v.selected = false;
+              }
+
+              if (
+                v.phone == searchText
+              ) {
+                v.selected = false;
+              } else if (v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
+                v.selected = false;
+              }
+              return !v.selected;
+            });
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined(currentPage)) {
+            this.selectPage(1);
+          } else {
+            this.selectPage(currentPage);
+          }
+        },
+        buildPagination() {
+          let numberOfPage = Math.ceil(
+            this.filteredItems.length / this.pagination.itemPerPage
+          );
+          this.pagination.items = [];
+          for (var i = 0; i < numberOfPage; i++) {
+            this.pagination.items.push(i + 1);
+          }
+        },
+        selectPage(item) {
+          this.pagination.currentPage = item;
+
+          let start = 0;
+          let end = 0;
+          if (this.pagination.currentPage < this.pagination.range - 2) {
+            start = 1;
+            end = start + this.pagination.range - 1;
+          } else if (
+            this.pagination.currentPage <= this.pagination.items.length &&
+            this.pagination.currentPage >
+            this.pagination.items.length - this.pagination.range + 2
+          ) {
+            start = this.pagination.items.length - this.pagination.range + 1;
+            end = this.pagination.items.length;
+          } else {
+            start = this.pagination.currentPage - 2;
+            end = this.pagination.currentPage + 2;
+          }
+          if (start < 1) {
+            start = 1;
+          }
+          if (end > this.pagination.items.length) {
+            end = this.pagination.items.length;
+          }
+
+          this.pagination.filteredItems = [];
+          for (var i = start; i <= end; i++) {
+            this.pagination.filteredItems.push(i);
+          }
+
+          this.paginatedItems = this.filteredItems.filter((v, k) => {
+            return (
+              Math.ceil((k + 1) / this.pagination.itemPerPage) ==
+              this.pagination.currentPage
+            );
+          });
+        },
+        clearAllItem() {
+          this.items = [];
+          items = [];
+          this.searchInTheList4(0, 1);
+        },
+        selectItem(item) {
+          item.selected = true;
+          this.selectedItems.push(item);
+          if (item.email != "****") {
+            this.searchInTheList2(item.email, 1);
+          } else {
             this.searchInTheList4(0, 1);
-          },
-          selectItem(item) {
-            console.log('logselectItems');
-            console.log(item);
-            item.selected = true;
-            this.selectedItems.push(item);
-            if (item.email != "****") {
-              console.log("1");
-              this.searchInTheList2(item.email, 1);
-            } else {
-              this.searchInTheList4(0, 1);
-            }
+          }
 
-            if (item.address != "****") {
-              console.log("2");
-              this.searchInTheList2(item.address, 1);
-            } else {
-              this.searchInTheList4(0, 1);
-            }
-
-            if (item.phone != "****") {
-              console.log("3");
-              this.searchInTheList2(item.phone, 1);
-            } else {
-              this.searchInTheList4(0, 1);
-            }
-          },
-          removeSelectedItem(item) {
-            item.selected = false;
-            this.selectedItems.$remove(item);
-            this.searchInTheList3(item.email, 1);
-            this.searchInTheList3(item.address, 1);
-            this.searchInTheList3(item.phone, 1);
-          },
-          deleteItem(item) {
-            // item.selected = true;
-            this.items.shift(item);
+          if (item.address != "****") {
+            this.searchInTheList2(item.address, 1);
+          } else {
             this.searchInTheList4(0, 1);
-          },
-          submitCourseExcel(){
+          }
 
-          for (var i = 0; i < XL_row_object.length  ; i++) {
+          if (item.phone != "****") {
+            this.searchInTheList2(item.phone, 1);
+          } else {
+            this.searchInTheList4(0, 1);
+          }
+        },
+        removeSelectedItem(item) {
+          item.selected = false;
+          this.selectedItems.$remove(item);
+          this.searchInTheList3(item.email, 1);
+          this.searchInTheList3(item.address, 1);
+          this.searchInTheList3(item.phone, 1);
+        },
+        deleteItem(item) {
+          // item.selected = true;
+          this.items.shift(item);
+          this.searchInTheList4(0, 1);
+        },
+        submitCourseExcel() {
+
+          for (var i = 0; i < XL_row_object.length; i++) {
             XL_row_object[i].課程代號 = String(XL_row_object[i].課程代號)
             XL_row_object[i].課程名稱 = String(XL_row_object[i].課程名稱)
             XL_row_object[i].第一節 = String(XL_row_object[i].第一節)
             XL_row_object[i].第二節 = String(XL_row_object[i].第二節)
             XL_row_object[i].第三節 = String(XL_row_object[i].第三節)
 
-          
             if (
               XL_row_object[i].課程代號 == undefined ||
               XL_row_object[i].課程代號 == null ||
               XL_row_object[i].課程代號 == ""
             ) {
               alert("請輸入課程代號");
-              return ;
+              return;
             }
 
             if (
@@ -659,7 +572,7 @@
               XL_row_object[i].課程名稱 == ""
             ) {
               alert("請輸入課程名稱");
-              return ;
+              return;
             }
 
             if (
@@ -668,11 +581,11 @@
               XL_row_object[i].第一節 == ""
             ) {
               alert("至少輸入一節課程");
-              return ;
+              return;
             }
 
             if (
-             XL_row_object[i].第二節 == undefined ||
+              XL_row_object[i].第二節 == undefined ||
               XL_row_object[i].第二節 == null ||
               XL_row_object[i].第二節 == ""
             ) {
@@ -687,22 +600,22 @@
               XL_row_object[i].第三節 = "****";
             }
 
-
-        this.items.push({
-          names : XL_row_object[i].課程代號,
-          ssn: chance.ssn(), // SSN as person ID
-          name: XL_row_object[i].課程名稱,
-          email:XL_row_object[i].第一節,
-          address:XL_row_object[i].第二節,
-          phone:XL_row_object[i].第三節,
-          selected: false,
-        });
-      }
-      this.searchInTheList4(0, 1);
-      alert("已增加資料");
-          },
+            this.items.push({
+              names: XL_row_object[i].課程代號,
+              ssn: chance.ssn(), // SSN as person ID
+              name: XL_row_object[i].課程名稱,
+              email: XL_row_object[i].第一節,
+              address: XL_row_object[i].第二節,
+              phone: XL_row_object[i].第三節,
+              selected: false,
+            });
+          }
+          this.searchInTheList4(0, 1);
+          alert("已增加資料");
         },
-      });
-    </script>
-  </body>
+      },
+    });
+  </script>
+</body>
+
 </html>
