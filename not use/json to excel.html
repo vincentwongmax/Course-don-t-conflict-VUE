@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://cdn.jsdelivr.net/alasql/0.3/alasql.min.js"></script>
+    <script lang="javascript" src="js/xlsx.full.min.js"></script>
+</head>
+<body>
+   
+
+<button onclick="saveFile()">Save XLSX file</button>
+<script>
+    
+    function saveFile () {
+    var data1 = [{a:1,b:10},{a:2,b:20}];
+    var data2 = [{a:100,b:10},{a:200,b:20}];
+    var opts = [{sheetid:'One',header:true},{sheetid:'Two',header:false}];
+    var res = alasql('SELECT * INTO XLSX("restest344b.xlsx",?) FROM ?',
+                     [opts,[data1,data2]]);
+    }
+</script>
+</body>
+</html>

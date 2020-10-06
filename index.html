@@ -18,10 +18,13 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"
     integrity="sha512-90vH1Z83AJY9DmlWa8WkjkV79yfS2n2Oxhsi2dZbIv0nC4E6m5AbH8Nh156kkM7JePmqD6tcZsfad1ueoaovww=="
     crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/alasql/0.3/alasql.min.js"></script>
 </head>
 
 <body>
   <div id="app" class="container">
+    <button v-on:click="exportSaveFile()">匯出已選課表</button>
+
     <h3 class="title is-3 ">選課不衝突神器</h3>
     <h5 class="subtitle is-5"></h5>
 
@@ -163,7 +166,7 @@
       </table>
     </div>
   </div>
-
+ 
   <style>
     #app {
       padding: 40px 0;
@@ -203,9 +206,9 @@
     for (var i = 0; i < 10; i++) {
       items.push({
         key: i + 1,
-        names: chance.sentence({ words: 3 }),
         ssn: chance.ssn(), // SSN as person ID
         name: `${chance.natural({ min: 1000, max: 9999 })}`,
+        names: chance.sentence({ words: 3 }),
         email:
           `(${chance.character({ pool: '一二三四五' })})` +
           `${chance.natural({ min: 1, max: 9 })}`,
@@ -274,6 +277,41 @@
         this.selectPage(1);
       },
       methods: {
+        exportSaveFile() {
+          console.log(this.items);  
+        // var data1 = [{a:1,b:10},{a:2,b:20}];
+        // var data2 = [{a:100,b:10},{a:200,b:20}];
+        // var opts = [{sheetid:'One',header:true},{sheetid:'Two',header:false}];
+        // var res = alasql('SELECT * INTO XLSX("restest344b.xlsx",?) FROM ?',
+        //                 [opts,[data1,data2]]);
+        var exportSaveFiles = this.items.filter(function(item, index, array){
+          return item.selectedOutput == true;       
+        });
+
+        exportSaveFiles.forEach(function(item, index, array){
+          item.課程代號 = item.name ;
+          item.課程名稱 = item.names ;
+          item.第一節 = item.email ;
+          item.第二節 = item.address ;
+          item.第三節 = item.phone ;
+
+          delete item.name ;
+          delete item.names ;
+          delete item.email ;
+          delete item.address ;
+          delete item.phone ;
+
+          delete item.selected ;
+          delete item.selectedOutput;
+          delete item.ssn;
+        });
+
+        var data1 = exportSaveFiles;
+        var opts = [{sheetid:'One',header:false}];
+        var res = alasql('SELECT * INTO XLSX("restest344b.xlsx",?) FROM ?',
+                        [opts,[data1]]);
+
+        },
         clearSearchItem() {
           this.searchItem = undefined;
           this.searchInTheList("");
@@ -599,6 +637,7 @@
         },
         removeSelectedItem(item) {
           item.selected = false;
+          item.selectedOutput = false;
           this.selectedItems.$remove(item);
           this.searchInTheList3(item.email, 1);
           this.searchInTheList3(item.address, 1);
