@@ -23,7 +23,7 @@
 
 <body>
   <div id="app" class="container">
-    <button v-on:click="exportSaveFile()">匯出已選課表</button>
+   
 
     <h3 class="title is-3 ">選課不衝突神器</h3>
     <h5 class="subtitle is-5"></h5>
@@ -137,6 +137,7 @@
       <a class="button is-danger is-outlined" v-on:click="clearAllItem()">清除所有資料</a>
       <a v-if="openSelectedlist" class="button is-info is-outlined" v-on:click="searchInTheList4()">顯示所有可選資料</a>
       <a v-if="!openSelectedlist" class="button is-success is-outlined" v-on:click="showAlreadySelect()">顯示已選取的資料</a>
+      <button v-if="openSelectedlist" class="button is-warning is-outlined" v-on:click="exportSaveFile()">匯出已選課表</button>
 
     </nav>
     <div class="m-table">
@@ -278,12 +279,10 @@
       },
       methods: {
         exportSaveFile() {
-          console.log(this.items);  
-        // var data1 = [{a:1,b:10},{a:2,b:20}];
-        // var data2 = [{a:100,b:10},{a:200,b:20}];
-        // var opts = [{sheetid:'One',header:true},{sheetid:'Two',header:false}];
-        // var res = alasql('SELECT * INTO XLSX("restest344b.xlsx",?) FROM ?',
-        //                 [opts,[data1,data2]]);
+        if(this.selectedItems[0] == undefined){
+          alert("未選擇任何課程");
+          return ;
+        }
         var exportSaveFiles = this.items.filter(function(item, index, array){
           return item.selectedOutput == true;       
         });
@@ -483,7 +482,7 @@
                 v.email == searchText
               ) {
                 v.selected = false;
-              } else if (v.email.indexOf(searchText) > -1) {
+              } else if (v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
                 v.selected = false;
               }
               if (
@@ -609,9 +608,11 @@
           });
         },
         clearAllItem() {
-          this.items = [];
-          items = [];
-          this.searchInTheList4(0, 1);
+          if(confirm("清除所有資料?")){
+            this.items = [];
+            items = [];
+            this.searchInTheList4(0, 1);
+          }
         },
         selectItem(item) {
           item.selected = true;
@@ -648,9 +649,11 @@
           }
         },
         deleteItem(item) {
-          this.selectedItems.$remove(item);
-          this.items.splice(item.key-1,1);
-          this.searchInTheList4(0, 1);
+          if(confirm("確定刪除?")){
+            this.selectedItems.$remove(item);
+            this.items.splice(item.key-1,1);
+            this.searchInTheList4(0, 1);
+          }
         },
         submitCourseExcel() {
           for (var i = 0; i < XL_row_object.length; i++) {
