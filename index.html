@@ -88,7 +88,7 @@
           <input class="input" v-model="searchItem" v-on:keyup="searchInTheList(searchItem)" type="text"
             placeholder="搜查課程代號" />
           <span  v-if="!openSelectedlist" class="help is-dark"><strong>{{filteredItems.length | numeral}}</strong> of
-            {{items.length | numeral}} 筆資料</span>
+            {{items.length | numeral}} 筆資料  {{items.length - filteredItems.length   | numeral}} 筆資料因時間衝突不顯示 </span>
         </p>
         <p class="control">
           <a class="button is-info" v-on:click="clearSearchItem" v-bind:class="{'is-disabled': searchItem==''}">
@@ -613,8 +613,7 @@
         },
         deleteItem(item) {
           this.selectedItems.$remove(item);
-          // item.selected = true;
-          this.items.shift(item);
+          this.items.splice(item.key-1,1);
           this.searchInTheList4(0, 1);
         },
         submitCourseExcel() {
