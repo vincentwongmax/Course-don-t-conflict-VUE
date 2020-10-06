@@ -48,17 +48,17 @@
 
         <p class="control is-expanded">
           <input class="input" v-model="scheduleTime1" v-on:keyup="searchInTheList(searchItem)" type="text"
-            placeholder="請輸入第一節課" />
+            placeholder="第一節課 (一)1" />
         </p>
 
         <p class="control is-expanded">
           <input class="input" v-model="scheduleTime2" v-on:keyup="searchInTheList(searchItem)" type="text"
-            placeholder="請輸入第二節課" />
+            placeholder="第二節課(六)6" />
         </p>
 
         <p class="control is-expanded">
           <input class="input" v-model="scheduleTime3" v-on:keyup="searchInTheList(searchItem)" type="text"
-            placeholder="請輸入第三節課" />
+            placeholder="第三節課(日)3" />
         </p>
 
         <p class="control">
@@ -87,7 +87,7 @@
         <p class="control is-expanded">
           <input class="input" v-model="searchItem" v-on:keyup="searchInTheList(searchItem)" type="text"
             placeholder="搜查課程代號" />
-          <span class="help is-dark"><strong>{{filteredItems.length | numeral}}</strong> of
+          <span  v-if="!openSelectedlist" class="help is-dark"><strong>{{filteredItems.length | numeral}}</strong> of
             {{items.length | numeral}} 筆資料</span>
         </p>
         <p class="control">
@@ -99,7 +99,7 @@
     </div>
     <div class="box m-tags">
       <span><strong>{{selectedItems.length}}</strong> 筆資料已選取</span>
-      <a class="button is-success is-outlined" v-on:click="showAlreadySelect()">顯示已選取的資料</a>
+      
 
 
 
@@ -131,7 +131,8 @@
         Last
       </a>
       <a class="button is-danger is-outlined" v-on:click="clearAllItem()">清除所有資料</a>
-      <a class="button is-warning " v-on:click="searchInTheList4()">顯示所有可選資料</a>
+      <a v-if="openSelectedlist" class="button is-info is-outlined" v-on:click="searchInTheList4()">顯示所有可選資料</a>
+      <a v-if="!openSelectedlist" class="button is-success is-outlined" v-on:click="showAlreadySelect()">顯示已選取的資料</a>
 
     </nav>
     <div class="m-table">
@@ -143,7 +144,7 @@
           <th>第一節</th>
           <th>第二節</th>
           <th>第三節</th>
-          <th>選取/刪除</th>
+          <th v-if="!openSelectedlist">選取/刪除</th>
         </tr>
 
         <tr v-for="item in paginatedItems">
@@ -153,9 +154,9 @@
           <td>{{item.email}}</td>
           <td>{{item.address}}</td>
           <td>{{item.phone}}</td>
-          <td>
-            <a class="button is-info is-outlined" v-on:click="selectItem(item)">Select</a>
-            <a class="button is-danger is-outlined" v-on:click="deleteItem(item)">Delete</a>
+          <td v-if="!openSelectedlist">
+            <a  class="button is-info is-outlined" v-on:click="selectItem(item)">Select</a>
+            <a  class="button is-danger is-outlined" v-on:click="deleteItem(item)">Delete</a>
           </td>
         </tr>
       </table>
@@ -247,7 +248,7 @@
     new Vue({
       el: "#app",
       data: {
-        openSelectedlish : false ,
+        openSelectedlist : false ,
         coursename: undefined,
         lessonCode: undefined,
         scheduleTime1: undefined,
@@ -343,18 +344,14 @@
             this.filteredItems = _.filter(this.items, function (v, k) {
               return v.selected && v.selectedOutput
             });
-            this.openSelectedlish = true ;
-            console.log('this.openSelectedlish1.1');
-            console.log(this.openSelectedlish);
+            this.openSelectedlist = true ;
           } else {
             this.filteredItems = _.filter(this.items, function (v, k) {
               return (
                 v.selected && v.selectedOutput
               );
             });
-            this.openSelectedlish = true ;
-            console.log('this.openSelectedlish1.2');
-            console.log(this.openSelectedlish);
+            this.openSelectedlist = true ;
           }
           this.filteredItems.forEach(function (v, k) {
             v.key = k + 1;
@@ -365,41 +362,6 @@
             this.selectPage(1);
           } else {
             this.selectPage();
-          }
-        },
-        delfunction(searchText, currentPage) {
-          if(this.openSelectedlish == false )
-              if (_.isUndefined(searchText)) {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return !v.selected;
-              });
-            } else {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return !v.selected;
-              });
-            }
-            if(this.openSelectedlish == true ){
-              if (_.isUndefined(searchText)) {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return v.selected && v.selectedOutput
-              });
-            } else {
-              this.filteredItems = _.filter(this.items, function (v, k) {
-                return v.selected && v.selectedOutput
-              });
-            }
-          
-          }
-        
-          this.filteredItems.forEach(function (v, k) {
-            v.key = k + 1;
-          });
-          this.buildPagination();
-
-          if (_.isUndefined(currentPage)) {
-            this.selectPage(1);
-          } else {
-            this.selectPage(currentPage);
           }
         },
         searchInTheList(searchText, currentPage) {
@@ -526,6 +488,7 @@
           }
         },
         searchInTheList4(searchText, currentPage) {
+          this.openSelectedlist = false;
           if (_.isUndefined(searchText)) {
             this.filteredItems = _.filter(this.items, function (v, k) {
               return !v.selected;
@@ -545,6 +508,7 @@
           } else {
             this.selectPage(currentPage);
           }
+          
         },
         searchInTheList(searchText, currentPage) {
           if (_.isUndefined(searchText)) {
@@ -641,14 +605,17 @@
           this.searchInTheList3(item.email, 1);
           this.searchInTheList3(item.address, 1);
           this.searchInTheList3(item.phone, 1);
+
+          if(this.openSelectedlist == true){
+             this.openSelectedlist = false;
+             this.showAlreadySelect();
+          }
         },
         deleteItem(item) {
           this.selectedItems.$remove(item);
           // item.selected = true;
           this.items.shift(item);
-          this.delfunction(0, 1);
-          console.log('this.openSelectedlish2.2');
-          console.log(this.openSelectedlish);
+          this.searchInTheList4(0, 1);
         },
         submitCourseExcel() {
 
