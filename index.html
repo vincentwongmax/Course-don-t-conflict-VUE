@@ -99,6 +99,10 @@
     </div>
     <div class="box m-tags">
       <span><strong>{{selectedItems.length}}</strong> 筆資料已選取</span>
+      <a class="button is-success is-outlined" v-on:click="showAlreadySelect()">顯示已選取的資料</a>
+
+
+
       <div class="m-tags-items">
         <a v-for="item in selectedItems" v-on:click="removeSelectedItem(item)" class="tag is-dark is-small">
           {{item.name}} {{item.names}}
@@ -106,6 +110,8 @@
         </a>
       </div>
     </div>
+
+
     <nav class="pagination m-pagination">
       <a class="button" v-on:click="selectPage(pagination.items[0])"
         v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}">
@@ -125,6 +131,8 @@
         Last
       </a>
       <a class="button is-danger is-outlined" v-on:click="clearAllItem()">清除所有資料</a>
+      <a class="button is-warning " v-on:click="searchInTheList4()">顯示所有可選資料</a>
+
     </nav>
     <div class="m-table">
       <table class="table is-bordered is-striped is-narrow">
@@ -239,6 +247,7 @@
     new Vue({
       el: "#app",
       data: {
+        openSelectedlish : false ,
         coursename: undefined,
         lessonCode: undefined,
         scheduleTime1: undefined,
@@ -320,6 +329,7 @@
             address: this.scheduleTime2,
             phone: this.scheduleTime3,
             selected: false,
+            selectedOutput: false,
           });
           this.searchInTheList4(0, 1);
           this.lessonCode = undefined;
@@ -328,17 +338,59 @@
           this.scheduleTime3 = undefined;
           this.coursename = undefined;
         },
-
-        searchInTheList4(searchText, currentPage) {
-          if (_.isUndefined(searchText)) {
+        showAlreadySelect(){
+          if (_.isUndefined()) {
             this.filteredItems = _.filter(this.items, function (v, k) {
-              return !v.selected;
+              return v.selected && v.selectedOutput
             });
+            this.openSelectedlish = true ;
+            console.log('this.openSelectedlish1.1');
+            console.log(this.openSelectedlish);
           } else {
             this.filteredItems = _.filter(this.items, function (v, k) {
-              return !v.selected;
+              return (
+                v.selected && v.selectedOutput
+              );
             });
+            this.openSelectedlish = true ;
+            console.log('this.openSelectedlish1.2');
+            console.log(this.openSelectedlish);
           }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined()) {
+            this.selectPage(1);
+          } else {
+            this.selectPage();
+          }
+        },
+        delfunction(searchText, currentPage) {
+          if(this.openSelectedlish == false )
+              if (_.isUndefined(searchText)) {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return !v.selected;
+              });
+            } else {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return !v.selected;
+              });
+            }
+            if(this.openSelectedlish == true ){
+              if (_.isUndefined(searchText)) {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return v.selected && v.selectedOutput
+              });
+            } else {
+              this.filteredItems = _.filter(this.items, function (v, k) {
+                return v.selected && v.selectedOutput
+              });
+            }
+          
+          }
+        
           this.filteredItems.forEach(function (v, k) {
             v.key = k + 1;
           });
@@ -463,6 +515,7 @@
             this.selectPage(currentPage);
           }
         },
+        
         buildPagination() {
           let numberOfPage = Math.ceil(
             this.filteredItems.length / this.pagination.itemPerPage
@@ -470,6 +523,51 @@
           this.pagination.items = [];
           for (var i = 0; i < numberOfPage; i++) {
             this.pagination.items.push(i + 1);
+          }
+        },
+        searchInTheList4(searchText, currentPage) {
+          if (_.isUndefined(searchText)) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined(currentPage)) {
+            this.selectPage(1);
+          } else {
+            this.selectPage(currentPage);
+          }
+        },
+        searchInTheList(searchText, currentPage) {
+          if (_.isUndefined(searchText)) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return (
+                !v.selected &&
+                v.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1
+              );
+            });
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined(currentPage)) {
+            this.selectPage(1);
+          } else {
+            this.selectPage(currentPage);
           }
         },
         selectPage(item) {
@@ -517,6 +615,7 @@
         },
         selectItem(item) {
           item.selected = true;
+          item.selectedOutput = true;
           this.selectedItems.push(item);
           if (item.email != "****") {
             this.searchInTheList2(item.email, 1);
@@ -544,9 +643,12 @@
           this.searchInTheList3(item.phone, 1);
         },
         deleteItem(item) {
+          this.selectedItems.$remove(item);
           // item.selected = true;
           this.items.shift(item);
-          this.searchInTheList4(0, 1);
+          this.delfunction(0, 1);
+          console.log('this.openSelectedlish2.2');
+          console.log(this.openSelectedlish);
         },
         submitCourseExcel() {
 
@@ -608,6 +710,7 @@
               address: XL_row_object[i].第二節,
               phone: XL_row_object[i].第三節,
               selected: false,
+              selectedOutput: false,
             });
           }
           this.searchInTheList4(0, 1);
