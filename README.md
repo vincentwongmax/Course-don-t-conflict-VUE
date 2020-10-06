@@ -7,4 +7,5 @@
 使用以下神器吧，解決課堂衝突問題
 
 ## DEMO:  
-http://mankinwong.xyz/courseconflict/
+http://course.mankinwong.xyz
+
