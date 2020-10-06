@@ -447,7 +447,6 @@
               } else if (v.email.indexOf(searchText) > -1) {
                 v.selected = false;
               }
-
               if (
                 v.address == searchText
               ) {
@@ -508,7 +507,6 @@
           } else {
             this.selectPage(currentPage);
           }
-          
         },
         searchInTheList(searchText, currentPage) {
           if (_.isUndefined(searchText)) {
@@ -536,7 +534,6 @@
         },
         selectPage(item) {
           this.pagination.currentPage = item;
-
           let start = 0;
           let end = 0;
           if (this.pagination.currentPage < this.pagination.range - 2) {
@@ -605,7 +602,6 @@
           this.searchInTheList3(item.email, 1);
           this.searchInTheList3(item.address, 1);
           this.searchInTheList3(item.phone, 1);
-
           if(this.openSelectedlist == true){
              this.openSelectedlist = false;
              this.showAlreadySelect();
@@ -617,7 +613,6 @@
           this.searchInTheList4(0, 1);
         },
         submitCourseExcel() {
-
           for (var i = 0; i < XL_row_object.length; i++) {
             XL_row_object[i].課程代號 = String(XL_row_object[i].課程代號)
             XL_row_object[i].課程名稱 = String(XL_row_object[i].課程名稱)
@@ -683,7 +678,6 @@
           alert("已增加資料");
           document.getElementById('fileUploader').value = '';
           XL_row_object = '';
-          
         },
       },
     });
