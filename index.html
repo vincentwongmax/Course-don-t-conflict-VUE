@@ -33,6 +33,10 @@
     <a class="button is-info" v-on:click="submitCourseExcel()">
       提交
     </a>
+    <a class="button is-success" href="範例.xlsx">
+      範例格式下載
+    </a>
+
     </br></br>
     <label id="jsonObject"> </label>
 
@@ -333,11 +337,12 @@
           delete item.selected ;
           delete item.selectedOutput;
           delete item.ssn;
+          delete item.key;
         });
 
         var data1 = exportSaveFiles;
         var opts = [{sheetid:'One',header:false}];
-        var res = alasql('SELECT * INTO XLSX("restest344b.xlsx",?) FROM ?',
+        var res = alasql('SELECT * INTO XLSX("已選課表.xlsx",?) FROM ?',
                         [opts,[data1]]);
 
         },
