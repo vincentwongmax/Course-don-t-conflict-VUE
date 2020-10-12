@@ -72,6 +72,35 @@
         </p>
       </div>
 
+
+      <div class="box m-form">
+        <div class="control is-grouped">
+          <p class="control is-expanded">
+            <input class="input" v-model="lessonCode" v-on:keyup="searchInTheList(searchItem)" type="text"
+              placeholder="請輸入課程代號" />
+          </p>
+  
+          <p class="control is-expanded">
+            <input class="input" v-model="coursename" v-on:keyup="searchInTheList(searchItem)" type="text"
+              placeholder="課程名稱" />
+          </p>
+
+          <p class="control is-expanded">
+            <input class="input" v-model="scheduleTime1" v-on:keyup="submitCourse2()" type="text"
+              placeholder="AI 輸入" />
+          </p>
+
+
+     
+          <p class="control">
+            <a class="button is-info" v-on:click="submitCourse2()"
+              v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }">
+              提交
+            </a>
+          </p>
+        </div>
+
+
       <span>
         課程代號:
         <span style="color: rgb(255, 127, 148)">{{lessonCode}}</span>
@@ -103,9 +132,6 @@
     </div>
     <div class="box m-tags">
       <span><strong>{{selectedItems.length}}</strong> 筆資料已選取</span>
-      
-
-
 
       <div class="m-tags-items">
         <a v-for="item in selectedItems" v-on:click="removeSelectedItem(item)" class="tag is-dark is-small">
@@ -138,7 +164,10 @@
       <a v-if="openSelectedlist" class="button is-info is-outlined" v-on:click="searchInTheList4()">顯示所有可選資料</a>
       <a v-if="!openSelectedlist" class="button is-success is-outlined" v-on:click="showAlreadySelect()">顯示已選取的資料</a>
       <button v-if="openSelectedlist" class="button is-warning is-outlined" v-on:click="exportSaveFile()">匯出已選課表</button>
-
+      <br v-if="openDescription" ><br v-if="openDescription" >
+      <A1 v-if="openDescription" ><strong > 以下表格資料為 <a style="color: crimson;">隨機生成</a>，其生成資料為供使用者測試用，請按<a style="color: indianred;" v-on:click="clearAllItem()" >清除所有資料按鈕</a>後使用</strong></A1>
+      <br v-if="openDescription" >
+      <A1 v-if="openDescription" ><strong > 選擇對應項目後，系統會自動排除相同時間科目而不顯示，使用者可以再選擇剩下科目而不會發生衝突，如此類推</strong></A1>
     </nav>
     <div class="m-table">
       <table class="table is-bordered is-striped is-narrow">
@@ -204,7 +233,7 @@
 
   <script>
     let items = [];
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < `${chance.natural({ min: 10, max: 20 })}`; i++) {
       items.push({
         key: i + 1,
         ssn: chance.ssn(), // SSN as person ID
@@ -253,6 +282,7 @@
     new Vue({
       el: "#app",
       data: {
+        openDescription :  true ,
         openSelectedlist : false ,
         coursename: undefined,
         lessonCode: undefined,
@@ -313,7 +343,7 @@
         },
         clearSearchItem() {
           this.searchItem = undefined;
-          this.searchInTheList("");
+          this.searchInTheList("",this.pagination.currentPage);
         },
         submitCourse() {
           if (
@@ -370,12 +400,48 @@
             selected: false,
             selectedOutput: false,
           });
-          this.searchInTheList4(0, 1);
+          this.searchInTheList4(0, this.pagination.items.length || this.pagination.items.length==0 );
           this.lessonCode = undefined;
           this.scheduleTime1 = undefined;
           this.scheduleTime2 = undefined;
           this.scheduleTime3 = undefined;
           this.coursename = undefined;
+        },
+        submitCourse2() {
+        //   coursename: undefined,
+        // lessonCode: undefined,
+        // scheduleTime1: undefined,
+        // scheduleTime2: undefined,
+        // scheduleTime3: undefined,
+
+          
+
+          this.scheduleTime1 = this.scheduleTime1.replace(/\s+/g, " ");
+          this.scheduleTime1 = this.scheduleTime1.split(" ");
+          // let bool = array[2].charAt(0) == '(';
+
+          this.scheduleTime1 = this.scheduleTime1.filter(function(item, index, array){
+          return item.charAt(0) == '(';    
+        });
+        this.scheduleTime2 = '' ;
+        this.scheduleTime3 = '' ;
+
+        let sc2 = this.scheduleTime1;
+        // console.log(this.scheduleTime2);
+        // this.scheduleTime2 = this.scheduleTime1[1]; 
+
+        for (let index = 0; index < sc2.length ; index++) {
+          console.log(index);
+          this.scheduleTime = this.scheduleTime1[index];
+        }
+
+        // console.log(sc2);
+        // sc2.forEach(function(item, index, array){
+        //   console.log(index);
+        //    this.scheduleTime[index + 1] = this.scheduleTime1[index];
+        // });
+        // console.log(this.scheduleTime2);
+
         },
         showAlreadySelect(){
           if (_.isUndefined()) {
@@ -611,7 +677,8 @@
           if(confirm("清除所有資料?")){
             this.items = [];
             items = [];
-            this.searchInTheList4(0, 1);
+            this.searchInTheList4(0, this.pagination.currentPage);
+            this.openDescription = false ;
           }
         },
         selectItem(item) {
@@ -619,30 +686,30 @@
           item.selectedOutput = true;
           this.selectedItems.push(item);
           if (item.email != "****") {
-            this.searchInTheList2(item.email, 1);
+            this.searchInTheList2(item.email, this.pagination.currentPage);
           } else {
             this.searchInTheList4(0, 1);
           }
 
           if (item.address != "****") {
-            this.searchInTheList2(item.address, 1);
+            this.searchInTheList2(item.address, this.pagination.currentPage);
           } else {
-            this.searchInTheList4(0, 1);
+            this.searchInTheList4(0, this.pagination.currentPage);
           }
 
           if (item.phone != "****") {
-            this.searchInTheList2(item.phone, 1);
+            this.searchInTheList2(item.phone, this.pagination.currentPage);
           } else {
-            this.searchInTheList4(0, 1);
+            this.searchInTheList4(0, this.pagination.currentPage);
           }
         },
         removeSelectedItem(item) {
           item.selected = false;
           item.selectedOutput = false;
           this.selectedItems.$remove(item);
-          this.searchInTheList3(item.email, 1);
-          this.searchInTheList3(item.address, 1);
-          this.searchInTheList3(item.phone, 1);
+          this.searchInTheList3(item.email, this.pagination.currentPage);
+          this.searchInTheList3(item.address, this.pagination.currentPage);
+          this.searchInTheList3(item.phone, this.pagination.currentPage);
           if(this.openSelectedlist == true){
              this.openSelectedlist = false;
              this.showAlreadySelect();
@@ -652,7 +719,7 @@
           if(confirm("確定刪除?")){
             this.selectedItems.$remove(item);
             this.items.splice(item.key-1,1);
-            this.searchInTheList4(0, 1);
+            this.searchInTheList4(0, this.pagination.currentPage);
           }
         },
         submitCourseExcel() {
@@ -717,7 +784,7 @@
               selectedOutput: false,
             });
           }
-          this.searchInTheList4(0, 1);
+          this.searchInTheList4(0, this.pagination.currentPage);
           alert("已增加資料");
           document.getElementById('fileUploader').value = '';
           XL_row_object = '';
