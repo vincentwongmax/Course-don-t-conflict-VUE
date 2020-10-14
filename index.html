@@ -90,11 +90,9 @@
           </p>
 
           <p class="control is-expanded">
-            <input class="input" v-model="scheduleTime1" v-on:keyup="submitCourse2()" type="text"
+            <input class="input" v-model="AIKeyIn" v-on:keyup="submitCourse2()" type="text"
               placeholder="AI 輸入" />
           </p>
-
-
      
           <p class="control">
             <a class="button is-info" v-on:click="submitCourse2()"
@@ -294,6 +292,7 @@
         scheduleTime2: undefined,
         scheduleTime3: undefined,
         searchItem: undefined,
+        AIKeyIn: undefined,
         items: items,
         filteredItems: [],
         paginatedItems: [],
@@ -413,40 +412,33 @@
           this.coursename = undefined;
         },
         submitCourse2() {
-        //   coursename: undefined,
-        // lessonCode: undefined,
-        // scheduleTime1: undefined,
-        // scheduleTime2: undefined,
-        // scheduleTime3: undefined,
 
-          
-
-          this.scheduleTime1 = this.scheduleTime1.replace(/\s+/g, " ");
-          this.scheduleTime1 = this.scheduleTime1.split(" ");
+          this.AIKeyIn = this.AIKeyIn.replace(/\s+/g, " ");
+          this.AIKeyIn = this.AIKeyIn.split(" ");
           // let bool = array[2].charAt(0) == '(';
 
-          this.scheduleTime1 = this.scheduleTime1.filter(function(item, index, array){
+          this.AIKeyIn = this.AIKeyIn.filter(function(item, index, array){
           return item.charAt(0) == '(';    
         });
-        this.scheduleTime2 = '' ;
-        this.scheduleTime3 = '' ;
 
-        let sc2 = this.scheduleTime1;
-        // console.log(this.scheduleTime2);
-        // this.scheduleTime2 = this.scheduleTime1[1]; 
-
-        for (let index = 0; index < sc2.length ; index++) {
-          console.log(index);
-          this.scheduleTime = this.scheduleTime1[index];
-        }
-
-        // console.log(sc2);
-        // sc2.forEach(function(item, index, array){
-        //   console.log(index);
-        //    this.scheduleTime[index + 1] = this.scheduleTime1[index];
-        // });
-        // console.log(this.scheduleTime2);
-
+          if(this.AIKeyIn[0].indexOf(`-`.toLowerCase()) > -1)
+          {
+            this.AIKeyIn[0] = this.AIKeyIn[0].split('-');
+            let last = this.AIKeyIn[0][0].split(')');
+            this.scheduleTime1 = this.AIKeyIn[0][0]; 
+            this.scheduleTime2 = last[0] + ')' +  this.AIKeyIn[0][1]; 
+            this.scheduleTime3 = this.AIKeyIn[1];
+          }
+          else if(this.AIKeyIn[1].indexOf(`-`.toLowerCase()) > -1){
+            this.AIKeyIn[1] = this.AIKeyIn[1].split('-');
+            let last = this.AIKeyIn[1][0].split(')');
+            this.scheduleTime1 = this.AIKeyIn[0]; 
+            this.scheduleTime2 = this.AIKeyIn[1][0];
+            this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[1][1]; 
+          }else{
+            this.scheduleTime1 = this.AIKeyIn[0]; 
+            this.scheduleTime2 = this.AIKeyIn[1]; 
+          }
         },
         showAlreadySelect(){
           if (_.isUndefined()) {
