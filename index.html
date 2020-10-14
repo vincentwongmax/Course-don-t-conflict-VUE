@@ -90,12 +90,12 @@
           </p>
 
           <p class="control is-expanded">
-            <input class="input" v-model="AIKeyIn" v-on:keyup="submitCourse2()" type="text"
+            <input class="input" v-model="AIKeyIn" v-on:keyup="AIKeyInFunc()" type="text"
               placeholder="AI 輸入" />
           </p>
      
           <p class="control">
-            <a class="button is-info" v-on:click="submitCourse2()"
+            <a class="button is-info" v-on:click="submitCourse()"
               v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }">
               提交
             </a>
@@ -411,18 +411,16 @@
           this.scheduleTime3 = undefined;
           this.coursename = undefined;
         },
-        submitCourse2() {
-
+        AIKeyInFunc() { 
           this.AIKeyIn = this.AIKeyIn.replace(/\s+/g, " ");
           this.AIKeyIn = this.AIKeyIn.split(" ");
-          // let bool = array[2].charAt(0) == '(';
-
           this.AIKeyIn = this.AIKeyIn.filter(function(item, index, array){
-          return item.charAt(0) == '(';    
-        });
-
-          if(this.AIKeyIn[0].indexOf(`-`.toLowerCase()) > -1)
-          {
+              return item.charAt(0) == '(';    
+          });
+          this.AIKeyIn = this.AIKeyIn.filter(function(element, index, arr){
+            return arr.indexOf(element) === index;
+          });
+          if(this.AIKeyIn[0].indexOf(`-`.toLowerCase()) > -1){
             this.AIKeyIn[0] = this.AIKeyIn[0].split('-');
             let last = this.AIKeyIn[0][0].split(')');
             this.scheduleTime1 = this.AIKeyIn[0][0]; 
@@ -436,8 +434,9 @@
             this.scheduleTime2 = this.AIKeyIn[1][0];
             this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[1][1]; 
           }else{
-            this.scheduleTime1 = this.AIKeyIn[0]; 
-            this.scheduleTime2 = this.AIKeyIn[1]; 
+              this.scheduleTime1 = this.AIKeyIn[0]; 
+              this.scheduleTime2 = this.AIKeyIn[1]; 
+              this.scheduleTime3 = this.AIKeyIn[2];
           }
         },
         showAlreadySelect(){
