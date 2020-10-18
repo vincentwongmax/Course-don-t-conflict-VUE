@@ -314,10 +314,9 @@
       },
       methods: {
         exportSaveFile() {
-         
-
+          let exportSaveFiles = '' ;
           if(this.openSelectedlist == true){
-            var exportSaveFiles = this.items.filter(function(item, index, array){
+            exportSaveFiles = this.items.filter(function(item, index, array){
               return item.selectedOutput == true;       
             });
             if(this.selectedItems[0] == undefined){
@@ -328,30 +327,32 @@
             exportSaveFiles = this.items;
           }
 
+          let newArr = [];
           exportSaveFiles.forEach(function(item, index, array){
-            item.課程代號 = item.name ;
-            item.課程名稱 = item.names ;
-            item.第一節 = item.email ;
-            item.第二節 = item.address ;
-            item.第三節 = item.phone ;
+            newArr.push({課程代號 : item.name,
+            課程名稱 : item.names,
+            第一節 : item.email,
+            第二節 : item.address,
+            第三節 : item.phone});
+            
+            // // delete item.name ;
+            // // delete item.names ;
+            // // delete item.email ;
+            // // delete item.address ;
+            // // delete item.phone ;
 
-            delete item.name ;
-            delete item.names ;
-            delete item.email ;
-            delete item.address ;
-            delete item.phone ;
-
-            delete item.selected ;
-            delete item.selectedOutput;
-            delete item.ssn;
-            delete item.key;
+            // delete item.selected ;
+            // delete item.selectedOutput;
+            // delete item.ssn;
+            // delete item.key;
+            console.log(newArr)
           });
 
-          var data1 = exportSaveFiles;
-          var opts = [{sheetid:'One',header:false}];
+          var data1 = newArr;
+          var opts = [{sheetid:'One',header:true}];
           var res = alasql('SELECT * INTO XLSX("已選課表.xlsx",?) FROM ?',
                           [opts,[data1]]);
-
+          
         },
 
         clearSearchItem() {
