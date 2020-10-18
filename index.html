@@ -101,7 +101,7 @@
             </a>
           </p>
           <p class="control">
-            <a class="button is-danger is-outlined" target="_blank"  href="https://coursesearch02.fcu.edu.tw/">
+            <a class="button is-danger is-outlined" target="_blank"  href="https://course.fcu.edu.tw/coursequest.aspx">
               逢甲課程檢索系統
             </a>
           </p>
@@ -398,6 +398,10 @@
             this.scheduleTime3 = "****";
           }
 
+          this.scheduleTime1 = this.scheduleTime1.replace(/\s*/g,"");
+          this.scheduleTime2 = this.scheduleTime2.replace(/\s*/g,"");
+          this.scheduleTime3 = this.scheduleTime3.replace(/\s*/g,"");
+
           this.items.push({
             names: this.coursename,
             ssn: chance.ssn(), // SSN as person ID
@@ -427,23 +431,11 @@
           if(this.AIKeyIn[0].indexOf(`-`.toLowerCase()) > -1){  //scheduleTime1 has -
             this.AIKeyIn[0] = this.AIKeyIn[0].split('-');
             let last = this.AIKeyIn[0][0].split(')');
-            // console.log('第一個- 的數字');
-            // console.log(last[1]); // 第一個- 的數字
-            // console.log('第二個數字');
-            // console.log(this.AIKeyIn[0][1]);  //第二個數字
-            // console.log('第二個數字 - 第一個數字');
-            // console.log(this.AIKeyIn[0][1] - last[1] );
             if(this.AIKeyIn[0][1] - last[1] == 1){  // == 1
               this.scheduleTime1 = this.AIKeyIn[0][0]; 
               this.scheduleTime2 = last[0] + ')' +  this.AIKeyIn[0][1]; 
               this.scheduleTime3 = this.AIKeyIn[1];
             }else if(this.AIKeyIn[0][1] - last[1] == 2){
-              // console.log('第一節課');
-              // console.log(this.AIKeyIn[0][0]);  //第一節課
-              // console.log('第二節課');
-              // console.log(last[0] + ')' + '0' + `${this.AIKeyIn[0][1] - 1}`); //第二節課
-              // console.log('第三節課');
-              // console.log(last[0] + ')' + this.AIKeyIn[0][1]); //第三節課
               this.scheduleTime1 = this.AIKeyIn[0][0]; 
               this.scheduleTime2 = last[0] + ')' + '0' + `${this.AIKeyIn[0][1] - 1}`;
               this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[0][1];
@@ -468,7 +460,6 @@
             }else{
               alert("課程節數超出範圍,請手動輸入課程")
             }
-
           }else{
             console.log('else  ? ');
               this.scheduleTime1 = this.AIKeyIn[0]; 
@@ -805,6 +796,10 @@
             ) {
               XL_row_object[i].第三節 = "****";
             }
+
+            XL_row_object[i].第一節 = XL_row_object[i].第一節.replace(/\s*/g,"");
+            XL_row_object[i].第二節 = XL_row_object[i].第二節.replace(/\s*/g,"");
+            XL_row_object[i].第三節 = XL_row_object[i].第三節.replace(/\s*/g,"");
 
             this.items.push({
               names: XL_row_object[i].課程名稱,
