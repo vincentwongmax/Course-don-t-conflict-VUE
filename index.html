@@ -55,17 +55,17 @@
 
         <p class="control is-expanded">
           <input class="input" v-model="scheduleTime1" v-on:keyup="searchInTheList(searchItem)" type="text"
-            placeholder="第一節課 (一)1" />
+            placeholder="第一節課 (一)01" />
         </p>
 
         <p class="control is-expanded">
           <input class="input" v-model="scheduleTime2" v-on:keyup="searchInTheList(searchItem)" type="text"
-            placeholder="第二節課(六)6" />
+            placeholder="第二節課(六)06" />
         </p>
 
         <p class="control is-expanded">
           <input class="input" v-model="scheduleTime3" v-on:keyup="searchInTheList(searchItem)" type="text"
-            placeholder="第三節課(日)3" />
+            placeholder="第三節課(日)03" />
         </p>
 
         <p class="control">
@@ -80,26 +80,22 @@
       <div class="box m-form">
         <div class="control is-grouped">
           <p class="control is-expanded">
-            <input class="input" v-model="lessonCode" v-on:keyup="searchInTheList(searchItem)" type="text"
-              placeholder="請輸入課程代號" />
-          </p>
-  
-          <p class="control is-expanded">
-            <input class="input" v-model="coursename" v-on:keyup="searchInTheList(searchItem)" type="text"
-              placeholder="課程名稱" />
-          </p>
-
-          <p class="control is-expanded">
-            <input class="input" v-model="AIKeyIn" v-on:keyup="AIKeyInFunc()" type="text"
+            <input id="AIKEYIN" class="input" v-model="AIKeyIn" @keyup.enter="AIKeyInFunc()" type="text"
               placeholder="AI 輸入" />
           </p>
      
           <p class="control">
-            <a class="button is-info" v-on:click="submitCourse()"
-              v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }">
-              提交
+            <a class="button is-success" v-on:click="AIKeyInFunc()"
+             >
+              分析
             </a>
           </p>
+
+          <a class="button is-info" v-on:click="submitCourse()"
+            v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }">
+            提交
+          </a>
+          
           <p class="control">
             <a class="button is-danger is-outlined" target="_blank"  href="https://course.fcu.edu.tw/coursequest.aspx">
               逢甲課程檢索系統
@@ -126,7 +122,7 @@
           <input class="input" v-model="searchItem" v-on:keyup="searchInTheList(searchItem)" type="text"
             placeholder="搜查課程代號" />
           <span  v-if="!openSelectedlist" class="help is-dark"><strong>{{filteredItems.length | numeral}}</strong> of
-            {{items.length | numeral}} 筆資料 
+          {{items.length | numeral}} 筆資料 
           {{items.length - filteredItems.length - selectedItems.length   | numeral}} 筆資料因時間衝突不顯示 </span>
         </p>
         <p class="control">
@@ -170,6 +166,8 @@
       <a v-if="openSelectedlist" class="button is-info is-outlined" v-on:click="searchInTheList4()">顯示所有可選資料</a>
       <a v-if="!openSelectedlist" class="button is-success is-outlined" v-on:click="showAlreadySelect()">顯示已選取的資料</a>
       <button v-if="openSelectedlist" class="button is-warning is-outlined" v-on:click="exportSaveFile()">匯出已選課表</button>
+      <button v-if="!openSelectedlist" class="button is-warning is-secondary" v-on:click="exportSaveFile()">匯出所有課表</button>
+
       <br v-if="openDescription" ><br v-if="openDescription" >
       <A1 v-if="openDescription" ><strong > 以下表格資料為 <a style="color: crimson;">隨機生成</a>，其生成資料為供使用者測試用，請按<a style="color: indianred;" v-on:click="clearAllItem()" >清除所有資料按鈕</a>後使用</strong></A1>
       <br v-if="openDescription" >
@@ -246,13 +244,13 @@
         name: `${chance.natural({ min: 1000, max: 9999 })}`,
         names: chance.sentence({ words: 3 }),
         email:
-          `(${chance.character({ pool: '一二三四五' })})` +
+          `(${chance.character({ pool: '一二三四五' })})` + '0' +
           `${chance.natural({ min: 1, max: 9 })}`,
         address:
-          `(${chance.character({ pool: '一二三四五' })})` +
+          `(${chance.character({ pool: '一二三四五' })})` +  '0' +
           `${chance.natural({ min: 1, max: 9 })}`,
         phone:
-          `(${chance.character({ pool: '一二三四五' })})` +
+          `(${chance.character({ pool: '一二三四五' })})` +  '0' + 
           `${chance.natural({ min: 1, max: 9 })}`,
         selected: false,
       });
@@ -316,39 +314,46 @@
       },
       methods: {
         exportSaveFile() {
-        if(this.selectedItems[0] == undefined){
-          alert("未選擇任何課程");
-          return ;
-        }
-        var exportSaveFiles = this.items.filter(function(item, index, array){
-          return item.selectedOutput == true;       
-        });
+         
 
-        exportSaveFiles.forEach(function(item, index, array){
-          item.課程代號 = item.name ;
-          item.課程名稱 = item.names ;
-          item.第一節 = item.email ;
-          item.第二節 = item.address ;
-          item.第三節 = item.phone ;
+          if(this.openSelectedlist == true){
+            var exportSaveFiles = this.items.filter(function(item, index, array){
+              return item.selectedOutput == true;       
+            });
+            if(this.selectedItems[0] == undefined){
+              alert("未選擇任何課程");
+              return ;
+            }
+          }else{
+            exportSaveFiles = this.items;
+          }
 
-          delete item.name ;
-          delete item.names ;
-          delete item.email ;
-          delete item.address ;
-          delete item.phone ;
+          exportSaveFiles.forEach(function(item, index, array){
+            item.課程代號 = item.name ;
+            item.課程名稱 = item.names ;
+            item.第一節 = item.email ;
+            item.第二節 = item.address ;
+            item.第三節 = item.phone ;
 
-          delete item.selected ;
-          delete item.selectedOutput;
-          delete item.ssn;
-          delete item.key;
-        });
+            delete item.name ;
+            delete item.names ;
+            delete item.email ;
+            delete item.address ;
+            delete item.phone ;
 
-        var data1 = exportSaveFiles;
-        var opts = [{sheetid:'One',header:false}];
-        var res = alasql('SELECT * INTO XLSX("已選課表.xlsx",?) FROM ?',
-                        [opts,[data1]]);
+            delete item.selected ;
+            delete item.selectedOutput;
+            delete item.ssn;
+            delete item.key;
+          });
+
+          var data1 = exportSaveFiles;
+          var opts = [{sheetid:'One',header:false}];
+          var res = alasql('SELECT * INTO XLSX("已選課表.xlsx",?) FROM ?',
+                          [opts,[data1]]);
 
         },
+
         clearSearchItem() {
           this.searchItem = undefined;
           this.searchInTheList("",this.pagination.currentPage);
@@ -420,8 +425,20 @@
           this.coursename = undefined;
         },
         AIKeyInFunc() { 
+
+          this.lessonCode = undefined;
+          this.scheduleTime1 = undefined;
+          this.scheduleTime2 = undefined;
+          this.scheduleTime3 = undefined;
+          this.coursename = undefined;
+
           this.AIKeyIn = this.AIKeyIn.replace(/\s+/g, " ");
           this.AIKeyIn = this.AIKeyIn.split(" ");
+          let AIALL = this.AIKeyIn ;
+          if(AIALL[0].length == 4){
+            this.lessonCode = AIALL[0];
+            this.coursename = AIALL[2];
+          }
           this.AIKeyIn = this.AIKeyIn.filter(function(item, index, array){
               return item.charAt(0) == '(';    
           });
@@ -443,29 +460,24 @@
               alert("課程節數超出範圍,請手動輸入課程");
             }
           }
-          else if(this.AIKeyIn[1].indexOf(`-`.toLowerCase()) > -1){
-            //scheduleTime2 has -
-            this.AIKeyIn[1] = this.AIKeyIn[1].split('-');
-            let last = this.AIKeyIn[1][0].split(')');
-            console.log('第一個- 的數字');
-            console.log(last[1]); // 第一個- 的數字
-            console.log('第二個數字');
-            console.log(this.AIKeyIn[1][1]);  //第二個數字
-            console.log('第二個數字 - 第一個數字');
-            console.log(this.AIKeyIn[1][1] - last[1] );
-            if(this.AIKeyIn[1][1] - last[1] ==1){   // 兩節課之間差是1 
-              this.scheduleTime1 = this.AIKeyIn[0]; 
-              this.scheduleTime2 = this.AIKeyIn[1][0];
-              this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[1][1]; 
-            }else{
-              alert("課程節數超出範圍,請手動輸入課程")
+          else if(this.AIKeyIn[1] !== undefined){
+            if(this.AIKeyIn[1].indexOf(`-`.toLowerCase()) > -1){
+              this.AIKeyIn[1] = this.AIKeyIn[1].split('-');
+              let last = this.AIKeyIn[1][0].split(')');
+              if(this.AIKeyIn[1][1] - last[1] ==1){   
+                this.scheduleTime1 = this.AIKeyIn[0]; 
+                this.scheduleTime2 = this.AIKeyIn[1][0];
+                this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[1][1]; 
+              }else{
+                alert("課程節數超出範圍,請手動輸入課程")
+              }
             }
           }else{
-            console.log('else  ? ');
               this.scheduleTime1 = this.AIKeyIn[0]; 
               this.scheduleTime2 = this.AIKeyIn[1]; 
               this.scheduleTime3 = this.AIKeyIn[2];
           }
+          this.AIKeyIn = '' ;
         },
         showAlreadySelect(){
           if (_.isUndefined()) {
