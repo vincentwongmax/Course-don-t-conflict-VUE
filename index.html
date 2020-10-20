@@ -431,9 +431,24 @@
           this.AIKeyIn = this.AIKeyIn.replace(/\s+/g, " ");
           this.AIKeyIn = this.AIKeyIn.split(" ");
           let AIALL = this.AIKeyIn ;
+          
+          for (let index = 0; index < AIALL.length; index++) {
+            if(AIALL[0].length !== 4){
+              AIALL.splice(0, 1);
+              if(AIALL[0].length == 4){
+                break;
+              }
+            }
+          }
+
           if(AIALL[0].length == 4){
             this.lessonCode = AIALL[0];
-            this.coursename = AIALL[2];
+            if(AIALL[2].charAt(0) !== '('){
+              this.coursename = AIALL[2];
+            }else{
+              this.coursename = AIALL[1];
+              alert('格式錯誤');
+            }
           }
           
           this.AIKeyIn = this.AIKeyIn.filter(function(item, index, array){
