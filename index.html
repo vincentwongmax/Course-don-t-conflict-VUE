@@ -44,9 +44,7 @@
     切換單筆輸入
     </a>
 
-
-
-    </br></br>
+    </br v-if="AIKeyInBatchOpen" ></br v-if="AIKeyInBatchOpen">
     <label id="jsonObject"> </label>
 
     <div class="box m-form">
@@ -60,7 +58,6 @@
           <input class="input" v-model="coursename" v-on:keyup="searchInTheList(searchItem)" type="text"
             placeholder="課程名稱" />
         </p>
-
 
         <p class="control is-expanded">
           <input class="input" v-model="scheduleTime1" v-on:keyup="searchInTheList(searchItem)" type="text"
@@ -88,14 +85,11 @@
           <div v-if="AIKeyInBatchOpen" class="control is-grouped">
           <p class="control is-expanded">
             <input id="AIKEYIN" class="input" v-model="AIKeyIn" @keyup.enter="AIKeyInFunc()" type="text"
-              placeholder="AI 輸入" />
+              placeholder="AI單筆輸入且分析後可自行修改" />
           </p>
      
           <p class="control">
-            <a class="button is-success" v-on:click="AIKeyInFunc()"
-             >
-              分析
-            </a>
+            <a class="button is-success" v-on:click="AIKeyInFunc()">分析</a>
           </p>
 
           <a class="button is-info" v-on:click="submitCourse()"
@@ -113,14 +107,11 @@
         <div v-if="!AIKeyInBatchOpen"class="control is-grouped">
           <p class="control is-expanded">
             <textarea style="width:250px;height:100px;" class="input" v-model="AIKeyInBatch" @keyup.enter="AIKeyInBatchs()" type="text"
-              placeholder="AI 輸入" ></textarea>
+              placeholder="AI多筆輸入 說明:複製逢甲大學課程檢索系統的文字後貼上 可複製多筆課程 系統自動偵測 (課程節數超過三節不進行分析，請切換至單筆輸入模式，分兩筆課程輸入)"></textarea>
           </p>
      
           <p class="control">
-            <a class="button is-info" v-on:click="AIKeyInBatchs()"
-             >
-             提交
-            </a>
+            <a class="button is-info" v-on:click="AIKeyInBatchs()">提交</a>
           </p>
          
           <p class="control">
@@ -146,9 +137,9 @@
         <span style="color: rgb(255, 127, 148)"> {{scheduleTime2}} </span>
         第三節課:<span style="color: rgb(255, 127, 148)">{{scheduleTime3}}</span>
       </span>
-      <br />
-      <br />
-      <label class="label">搜查課程代號</label>
+      <br v-if="AIKeyInBatchOpen"/>
+      <br v-if="AIKeyInBatchOpen"/>
+     
       <div class="control is-grouped">
         <p class="control is-expanded">
           <input class="input" v-model="searchItem" v-on:keyup="searchInTheList(searchItem)" type="text"
@@ -166,7 +157,6 @@
     </div>
     <div class="box m-tags">
       <span><strong>{{selectedItems.length}}</strong> 筆資料已選取</span>
-
       <div class="m-tags-items">
         <a v-for="item in selectedItems" v-on:click="removeSelectedItem(item)" class="tag is-dark is-small">
           {{item.name}} {{item.names}}
@@ -175,24 +165,23 @@
       </div>
     </div>
 
-
     <nav class="pagination m-pagination">
       <a class="button" v-on:click="selectPage(pagination.items[0])"
         v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}">
-        First
+        第一頁
       </a>
       <a class="button" v-on:click="selectPage(this.pagination.currentPage-1)"
-        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}">Previous</a>
+        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[0] || this.pagination.items.length==0}">上一頁</a>
       <span v-for="item in pagination.filteredItems">
         <a class="button" v-on:click="selectPage(item)"
           v-bind:class="{'is-info': item == pagination.currentPage}">{{item | numeral}}</a>
       </span>
       <a class="button" v-on:click="selectPage(this.pagination.currentPage+1)"
-        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}">Next
-        page</a>
+        v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}">下一頁
+        </a>
       <a class="button" v-on:click="selectPage(pagination.items[pagination.items.length-1])"
         v-bind:class="{'is-disabled': this.pagination.currentPage==this.pagination.items[this.pagination.items.length-1] || this.pagination.items.length==0}">
-        Last
+        頁尾
       </a>
       <a class="button is-danger is-outlined" v-on:click="clearAllItem()">清除所有資料</a>
       <a v-if="openSelectedlist" class="button is-info is-outlined" v-on:click="searchInTheList4()">顯示所有可選資料</a>
@@ -269,7 +258,7 @@
 
   <script>
     let items = [];
-    for (var i = 0; i < `${chance.natural({ min: 10, max: 20 })}`; i++) {
+    for (var i = 0; i < 1; i++) {
       items.push({
         key: i + 1,
         ssn: chance.ssn(), // SSN as person ID
@@ -318,6 +307,7 @@
     new Vue({
       el: "#app",
       data: {
+        AIKeyInAddNumber : 1,
         AIKeyInBatchOpen : false,
         AIKeyInBatch : undefined,
         openDescription :  true ,
@@ -336,7 +326,7 @@
         pagination: {
           range: 5,
           currentPage: 1,
-          itemPerPage: 8,
+          itemPerPage: 100,
           items: [],
           filteredItems: [],
         },
@@ -465,7 +455,7 @@
           this.scheduleTime3 = undefined;
           this.coursename = undefined;
         },
-        Number(val) {
+        Numbers(val) {
           let regPos = /^[0-9]+.?[0-9]*$/;
       　　if (parseFloat(val).toString() !== "NaN"  && val.indexOf(`/`) == -1) {  //沒有等於-1
       　　　　return true;
@@ -477,9 +467,7 @@
           this.AIKeyInBatch = this.AIKeyInBatch.replace(/\s+/g, " ");
           this.AIKeyInBatch = this.AIKeyInBatch.split(" ");
           for (let index = 1; index < this.AIKeyInBatch.length ; index++) {
-             if(this.AIKeyInBatch[index].length == 4 && this.Number(this.AIKeyInBatch[index])){
-               console.log('進入IF');
-               console.log(this.AIKeyInBatch[index]);
+             if(this.AIKeyInBatch[index].length == 4 && this.Numbers(this.AIKeyInBatch[index])){
                 let row = this.AIKeyInBatch.slice(0,index);
                 this.AIKeyIn = row ;
                 if(this.AIKeyIn[0].length == 4 ){
@@ -488,12 +476,15 @@
                 }
                 this.AIKeyInBatch.splice(0,index); 
                 index = 1;
+                this.AIKeyInAddNumber = this.AIKeyInAddNumber + 1 ;
               }
           }
           this.AIKeyIn = this.AIKeyInBatch ;
           this.AIKeyInFunc();
           this.submitCourse();
           this.AIKeyInBatch = '';
+          alert('已成功輸入'+ this.AIKeyInAddNumber  + '筆資料');
+          this.AIKeyInAddNumber = 1;
         },
         AIKeyInFunc() { 
 
@@ -549,7 +540,13 @@
                 this.scheduleTime3 = this.AIKeyIn[1];
               }else if(this.AIKeyIn[0][1] - last[1] == 2){
                 this.scheduleTime1 = this.AIKeyIn[0][0]; 
-                this.scheduleTime2 = last[0] + ')' + '0' + `${this.AIKeyIn[0][1] - 1}`;
+                let addZero = this.AIKeyIn[0][1] - 1 ;
+                addZero = addZero.toString();
+                if(addZero.length == 1 ){
+                  this.scheduleTime2 = last[0] + ')' + '0' + `${this.AIKeyIn[0][1] - 1}`;
+                }else{
+                  this.scheduleTime2 = last[0] + ')' + `${this.AIKeyIn[0][1] - 1}`;
+                }
                 this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[0][1];
               }else{
                 if(this.AIKeyInBatchOpen == true ){
@@ -638,36 +635,57 @@
         searchInTheList2(searchText, currentPage) {
           if (_.isUndefined(searchText)) {
             this.filteredItems = _.filter(this.items, function (v, k) {
+              console.log('isUndefined(searchText)');
               return !v.selected;
             });
           } else {
             this.filteredItems = _.filter(this.items, function (v, k) {
+              console.log(v);
               if (
-                v.email == searchText
+              
+                v.email === searchText
+               
               ) {
+                console.log("v.email");
+                console.log(v.email);
+                console.log("searchText");
+                console.log(searchText);
                 v.selected = true;
               } else if (v.email.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
                 v.selected = true;
               }
 
               if (
-                v.address == searchText
+                v.address === searchText
               ) {
+                console.log("v.address");
+                console.log(v.address);
+                console.log("searchText");
+                console.log(searchText);
+
                 v.selected = true;
               } else if (v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
                 v.selected = true;
               }
 
               if (
-                v.phone == searchText
+                v.phone === searchText
               ) {
+                console.log("v.phone");
+                console.log(v.phone);
+                console.log("searchText");
+                console.log(searchText);
                 v.selected = true;
               } else if (v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
                 v.selected = true;
               }
 
-              return !v.selected;
+             
+              return v.selected == true;
             });
+
+            console.log('this.items');
+              console.log(this.items);
           }
           this.filteredItems.forEach(function (v, k) {
             v.key = k + 1;
@@ -828,10 +846,19 @@
           item.selected = true;
           item.selectedOutput = true;
           this.selectedItems.push(item);
+
+          console.log("item.email");
+          console.log("item.address");
+          console.log("item.phone");
+
+          console.log(item.email);
+          console.log(item.address);
+          console.log(item.phone);
+
           if (item.email != "****") {
             this.searchInTheList2(item.email, this.pagination.currentPage);
           } else {
-            this.searchInTheList4(0, 1);
+            this.searchInTheList4(0, this.pagination.currentPage);
           }
 
           if (item.address != "****") {
@@ -845,6 +872,9 @@
           } else {
             this.searchInTheList4(0, this.pagination.currentPage);
           }
+
+          this.searchInTheList4(0, this.pagination.currentPage);
+
         },
         removeSelectedItem(item) {
           item.selected = false;
