@@ -482,8 +482,10 @@
                console.log(this.AIKeyInBatch[index]);
                 let row = this.AIKeyInBatch.slice(0,index);
                 this.AIKeyIn = row ;
-                this.AIKeyInFunc();
-                this.submitCourse();
+                if(this.AIKeyIn[0].length == 4 ){
+                  this.AIKeyInFunc();
+                  this.submitCourse();
+                }
                 this.AIKeyInBatch.splice(0,index); 
                 index = 1;
               }
@@ -523,7 +525,7 @@
               this.coursename = AIALL[2];
             }else{
               this.coursename = AIALL[1];
-              if(AIKeyInBatchOpen == true ){
+              if(this.AIKeyInBatchOpen == true ){
                 alert('格式錯誤');
               }
             }
@@ -550,12 +552,12 @@
                 this.scheduleTime2 = last[0] + ')' + '0' + `${this.AIKeyIn[0][1] - 1}`;
                 this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[0][1];
               }else{
-                if(AIKeyInBatchOpen == true ){
+                if(this.AIKeyInBatchOpen == true ){
                   alert("課程節數超出範圍,請手動輸入課程");
                 }
               }
             }else{
-              if(AIKeyInBatchOpen == true ){
+              if(this.AIKeyInBatchOpen == true ){
                   alert("課程節數超出範圍,請手動輸入課程");
               }
             }
