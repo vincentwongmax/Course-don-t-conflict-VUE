@@ -421,6 +421,14 @@
          
 
           if (
+            this.scheduleTime1 == undefined ||
+            this.scheduleTime1 == null ||
+            this.scheduleTime1 == ""
+          ) {
+            this.scheduleTime1 = "****";
+          }
+
+          if (
             this.scheduleTime2 == undefined ||
             this.scheduleTime2 == null ||
             this.scheduleTime2 == ""
@@ -435,10 +443,10 @@
           ) {
             this.scheduleTime3 = "****";
           }
-
-          this.scheduleTime1 = this.scheduleTime1.replace(/\s*/g,"");
-          this.scheduleTime2 = this.scheduleTime2.replace(/\s*/g,"");
-          this.scheduleTime3 = this.scheduleTime3.replace(/\s*/g,"");
+         
+            this.scheduleTime1 = this.scheduleTime1.replace(/\s*/g,"");
+            this.scheduleTime2 = this.scheduleTime2.replace(/\s*/g,"");
+            this.scheduleTime3 = this.scheduleTime3.replace(/\s*/g,"");
 
           this.items.push({
             names: this.coursename,
@@ -458,17 +466,20 @@
           this.coursename = undefined;
         },
         Number(val) {
-        　　if (parseFloat(val).toString() == "NaN") {
-        　　　　return false;
-        　　} else {
-        　　　　return true;
-        　　}
+          let regPos = /^[0-9]+.?[0-9]*$/;
+      　　if (parseFloat(val).toString() !== "NaN"  && val.indexOf(`/`) == -1) {  //沒有等於-1
+      　　　　return true;
+      　　} else {
+      　　　　return false;
+      　　}
         },
         AIKeyInBatchs(){
           this.AIKeyInBatch = this.AIKeyInBatch.replace(/\s+/g, " ");
           this.AIKeyInBatch = this.AIKeyInBatch.split(" ");
           for (let index = 1; index < this.AIKeyInBatch.length ; index++) {
              if(this.AIKeyInBatch[index].length == 4 && this.Number(this.AIKeyInBatch[index])){
+               console.log('進入IF');
+               console.log(this.AIKeyInBatch[index]);
                 let row = this.AIKeyInBatch.slice(0,index);
                 this.AIKeyIn = row ;
                 this.AIKeyInFunc();
@@ -477,8 +488,6 @@
                 index = 1;
               }
           }
-          console.log('最後後');
-          console.log(this.AIKeyInBatch);
           this.AIKeyIn = this.AIKeyInBatch ;
           this.AIKeyInFunc();
           this.submitCourse();
@@ -493,7 +502,7 @@
           this.coursename = undefined;
 
           if(this.AIKeyInBatchOpen == true){
-            this.AIKeyIn = this.AIKeyIn.replace(/\s+/g, " ");   //增加開關
+            this.AIKeyIn = this.AIKeyIn.replace(/\s+/g, " ");  
             this.AIKeyIn = this.AIKeyIn.split(" ");
            } 
           
@@ -514,7 +523,9 @@
               this.coursename = AIALL[2];
             }else{
               this.coursename = AIALL[1];
-              alert('格式錯誤');
+              if(AIKeyInBatchOpen == true ){
+                alert('格式錯誤');
+              }
             }
           }
           
@@ -539,10 +550,14 @@
                 this.scheduleTime2 = last[0] + ')' + '0' + `${this.AIKeyIn[0][1] - 1}`;
                 this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[0][1];
               }else{
-                alert("課程節數超出範圍,請手動輸入課程");
+                if(AIKeyInBatchOpen == true ){
+                  alert("課程節數超出範圍,請手動輸入課程");
+                }
               }
             }else{
-              alert("課程節數超出範圍,請手動輸入課程");
+              if(AIKeyInBatchOpen == true ){
+                  alert("課程節數超出範圍,請手動輸入課程");
+              }
             }
           }
           else if(this.AIKeyIn[1] !== undefined){
@@ -557,6 +572,7 @@
                 alert("課程節數超出範圍,請手動輸入課程")
               }
             }else{
+
               this.scheduleTime1 = this.AIKeyIn[0]; 
               this.scheduleTime2 = this.AIKeyIn[1]; 
               this.scheduleTime3 = this.AIKeyIn[2];
