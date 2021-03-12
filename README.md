@@ -8,8 +8,6 @@
 
 
 ## DEMO:  
-測試伺服器 : http://course.mankinwong.xyz
-
 正式伺服器: https://coursefcu.ga
 
 
