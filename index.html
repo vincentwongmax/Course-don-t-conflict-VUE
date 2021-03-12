@@ -1,0 +1,1845 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Course</title>
+  <script src="js/jquery.js"> </script>
+  <script lang="javascript" src="js/xlsx.full.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/1.0.28/vue.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.6.3/css/font-awesome.min.css"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/chance/1.0.4/chance.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/numeral.js/1.5.3/numeral.min.js"></script>
+  <link rel="stylesheet" href="./css/bulma.css">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css"
+    integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.20/lodash.min.js"
+    integrity="sha512-90vH1Z83AJY9DmlWa8WkjkV79yfS2n2Oxhsi2dZbIv0nC4E6m5AbH8Nh156kkM7JePmqD6tcZsfad1ueoaovww=="
+    crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/alasql/0.3/alasql.min.js"></script>
+</head>
+
+<body>
+  
+  <div id="app" class="container">
+    <h3 class="title is-3 ">選課不衝突神器</h3>
+
+    <div class="select">
+      <select id="sel" v-model="branchselectvalue" @change="branchselect(branchselectvalue)" >
+        <option disabled value = "" >選擇分支操作</option>
+        <option value= "1" >建立分支</option>
+        <option value= "2" >分支匯出</option>
+        <option value= "3">分支匯入</option>
+      </select>
+    </div>
+
+    <div class="m-tags-items"> 
+      
+      請選擇您已建立的分支:  
+      <a v-for="item in saves"  class="tag is-danger is-small" v-on:click="recoversave(item)">
+        {{item.Name}}
+        <button v-on:click="remove(item)" class="delete is-small"></button>
+      </a>
+    
+    </div>
+
+    <p v-if="branchimportswitch" class="control is-expanded">
+      <textarea style="width:250px;height:100px;" class="input" v-model="branchimport"  type="text"
+        placeholder="分支匯入"></textarea>
+        <a class="button is-info" v-on:click="branchimportfunction()">
+          提交
+        </a>
+    </p>
+    <h5 class="subtitle is-5"></h5>
+    <div v-if="addcourse"> 
+      <input type="file" id="fileUploader" name="fileUploader" accept=".xls, .xlsx" />
+
+      <a class="button is-info" v-on:click="submitCourseExcel()">
+        提交
+      </a>
+
+      <a class="button is-success" href="範例格式.xlsx">
+        範例格式下載
+      </a>
+
+      <a v-if="AIKeyInBatchOpen" class="button is-danger" v-on:click="switchAIMultipleSingleKeyIn()">
+      切換多筆AI輸入
+      </a>
+
+      <a v-if="!AIKeyInBatchOpen" class="button is-danger" v-on:click="switchAIMultipleSingleKeyIn()">
+      切換單筆輸入
+      </a>
+
+
+      </br v-if="AIKeyInBatchOpen" ></br v-if="AIKeyInBatchOpen">
+      <label id="jsonObject"> </label>
+      
+      <div class="box m-form">
+        <div v-if="AIKeyInBatchOpen" class="control is-grouped">
+          <p class="control is-expanded">
+            <input class="input" v-model="lessonCode" v-on:keyup="searchInTheList(searchItem)" type="text"
+              placeholder="請輸入課程代號" />
+          </p>
+
+          <p class="control is-expanded">
+            <input class="input" v-model="coursename" v-on:keyup="searchInTheList(searchItem)" type="text"
+              placeholder="課程名稱" />
+          </p>
+
+          <p class="control is-expanded">
+            <input class="input" v-model="scheduleTime1" v-on:keyup="searchInTheList(searchItem)" type="text"
+              placeholder="第一節課 (一)01" />
+          </p>
+
+          <p class="control is-expanded">
+            <input class="input" v-model="scheduleTime2" v-on:keyup="searchInTheList(searchItem)" type="text"
+              placeholder="第二節課(六)06" />
+          </p>
+
+          <p class="control is-expanded">
+            <input class="input" v-model="scheduleTime3" v-on:keyup="searchInTheList(searchItem)" type="text"
+              placeholder="第三節課(日)03" />
+          </p>
+
+          <p class="control is-expanded">
+            <input class="input" v-model="credit" v-on:keyup="searchInTheList(searchItem)" type="text"
+              placeholder="學分" />
+          </p>
+
+          <p class="control is-expanded">
+            <input class="input" v-model="lessonType" v-on:keyup="searchInTheList(searchItem)" type="text"
+              placeholder="類型" />
+          </p>
+
+          <p class="control">
+            <a class="button is-info" v-on:click="submitCourse()"
+              v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }">
+              提交
+            </a>
+          </p>
+        </div>
+
+            <div v-if="AIKeyInBatchOpen" class="control is-grouped">
+            <p class="control is-expanded">
+              <input id="AIKEYIN" class="input" v-model="AIKeyIn" @keyup.enter="AIKeyInFunc()" type="text"
+                placeholder="AI單筆輸入且分析後可修改" />
+            </p>
+      
+            <p class="control">
+              <a class="button is-success" v-on:click="AIKeyInFunc()">分析</a>
+            </p>
+
+            <a class="button is-info" v-on:click="submitCourse()"
+              v-bind:class="{'is-disabled': lessonCode== undefined || scheduleTime1== undefined }">
+              提交
+            </a>
+            
+            <p class="control">
+              <a class="button is-danger is-outlined" target="_blank"  href="https://course.fcu.edu.tw/coursequest.aspx">
+                逢甲課程檢索系統
+              </a>
+            </p>
+
+           
+            
+          </div>
+
+          <div v-if="!AIKeyInBatchOpen"class="control is-grouped">
+            <p class="control is-expanded">
+              <textarea style="width:250px;height:100px;" class="input" v-model="AIKeyInBatch" @keyup.enter="AIKeyInBatchs()" type="text"
+                placeholder="AI多筆輸入 說明:複製逢甲大學課程檢索系統的文字後貼上 可複製多筆課程 系統自動偵測 (課程節數超過三節不進行分析，為了用戶知道該課程發生衝突，該課程三節課都會以 [****]進行顯示  請切換至單筆輸入模式，分兩筆課程輸入)"></textarea>
+            </p>
+      
+            <p class="control">
+              <a class="button is-info" v-on:click="AIKeyInBatchs()">提交</a>
+            </p>
+          
+            <p class="control">
+              <a class="button is-danger is-outlined" target="_blank"  href="https://course.fcu.edu.tw/coursequest.aspx">
+                逢甲課程檢索系統
+              </a>
+            </p>
+          </div>
+          
+        <span v-if="AIKeyInBatchOpen" >
+          課程代號:
+          <span style="color: rgb(255, 127, 148)">{{lessonCode}}</span>
+          課程名稱:
+          <span style="color: rgb(255, 127, 148)">{{coursename}}</span>
+          第一節課:
+          <span style="color: rgb(255, 127, 148)">{{scheduleTime1}}</span>
+          第二節課:
+          <span style="color: rgb(255, 127, 148)"> {{scheduleTime2}} </span>
+          第三節課:<span style="color: rgb(255, 127, 148)">{{scheduleTime3}}</span>
+          學分:<span style="color: rgb(255, 127, 148)">{{credit}}</span>
+          類型:<span style="color: rgb(255, 127, 148)">{{lessonType}}</span>
+          
+        </span>
+        <br v-if="AIKeyInBatchOpen"/>
+        <br v-if="AIKeyInBatchOpen"/>
+      </div>
+    </div>
+
+      <div class="control is-grouped">
+        <p class="control is-expanded">
+          <input v-if="!openSelectedlist" class="input" v-model="searchItem" v-on:keyup="searchInTheList(searchItem)" type="text"
+            placeholder="搜查課程代號或課程名稱" />
+          <span  v-if="!openSelectedlist" class="help is-dark"><strong>{{filteredItems.length  | numeral}}</strong> of
+          {{items.length - selectedvforshowexclude | numeral}} 筆資料 
+          {{items.length - filteredItems.length - selectedItems.length   | numeral}} 筆資料因時間衝突不顯示 </span>
+        </p>
+        <p v-if="!openSelectedlist" class="control">
+          <a class="button is-info" v-on:click="clearSearchItem" v-bind:class="{'is-disabled': searchItem==''}">
+            清除  
+          </a>
+        </p>
+      </div>
+    <div class="box m-tags">
+      <span><strong>{{selectedItems.length - selectedvforshowexclude }}</strong> 筆資料已選取</span>
+      <div class="m-tags-items">
+        <a v-for="item in selectedvfor"  v-on:click="SCCouse2(item)"  v-on:mouseleave="SCCouse(2)" v-on:mouseover.once="SCCouse(item)" class="tag is-primary is-light">
+          {{item.name}} {{item.names}}
+          <button v-on:click="removeSelectedItem(item)" class="delete is-small"></button>
+        </a>
+      </div>
+    </div>
+
+    <div v-if="openSelectedlist" v-show="!toggleexcludehandups" class="box m-tags">
+      <span><strong>{{selectedvforshowexclude}}</strong> 筆資料從特定時間中排除</span>
+      <div class="m-tags-items">
+        <a v-for="item in selectedvforexcludeshow"  v-on:click="SCCouse2(item)" v-on:mouseleave="SCCouse(2)" v-on:mouseover.once="SCCouse(item)" class="tag is-success is-light">
+          {{item.name}} {{item.names}}
+          <button v-on:click="removeSelectedItem(item)" class="delete is-small"></button>
+        </a>
+      </div>
+    </div>
+
+      <div v-if="conf" class="m-tags-items">  
+        <button v-on:click="SCCouse2(2)" class="delete is-small"></button>
+        與以下{{eachCCsHTML.length}} 個課程發生衝突 : 
+        <a v-for="item in eachCCsHTML"  class="tag is-danger is-small">
+          {{item}}
+        </a>
+      </div>
+
+      <div v-if="!conf" v-show="CCtable" class="m-tags-items">  
+        <button v-on:click="SCCouse2(2)" class="delete is-small"></button>
+        與以下{{eachCCsHTML.length}} 個課程發生衝突 : 
+        <a v-for="item in eachCCsHTML"  class="tag is-danger is-small">
+          {{item}}
+        </a>
+      </div>
+
+      <div v-show="CCtable" class="m-table">
+           發生衝突詳細資料
+      <button v-on:click="SCCouse2(2)" class="delete is-small"></button>
+      <table class="table is-bordered is-striped is-narrow ">
+
+          <tr>
+            <td style= "background-color: rgb(36, 193, 221)" >{{coursenumber1[0]}}</td>
+            <td style= "background-color: rgb(36, 193, 221)"  >{{coursenumber1[1]}}</td>
+            <td style= "background-color: rgb(36, 193, 221)"  >{{coursenumber1[2]}}</td>
+            <td style= "background-color: rgb(36, 193, 221)"  >{{coursenumber1[3]}}</td>
+            <td style= "background-color: rgb(36, 193, 221)"  >{{coursenumber1[4]}}</td>
+            <td style= "background-color: rgb(36, 193, 221)"  >{{coursenumber1[5]}}</td>
+            <td style= "background-color: rgb(36, 193, 221)"  >{{coursenumber1[6]}}</td>
+          </tr>
+          
+          <tr v-for="item in conflict2">
+            <td>{{item[0]}}</td>
+            <td>{{item[1]}}</td>
+            <td>{{item[2]}}</td>
+            <td>{{item[3]}}</td>
+            <td>{{item[4]}}</td>
+            <td>{{item[5]}}</td>
+            <td>{{item[6]}}</td>
+          </tr>
+        </table>
+      </div>
+
+      <br v-if="conf">
+    <nav class="pagination m-pagination">
+      <a class="button is-danger is-outlined" v-on:click="clearAllItem()">清除所有資料</a>
+      <a v-if="openSelectedlist" class="button is-info is-outlined" v-on:click="searchInTheList4()">顯示所有可選資料</a>
+      <a v-if="!openSelectedlist" class="button is-success is-outlined" v-on:click="showAlreadySelect()">顯示已選取的課表/時間表</a>
+      <button v-if="openSelectedlist" class="button is-warning is-outlined" v-on:click="exportSaveFile()">匯出已選課表</button>
+      <button v-if="!openSelectedlist" class="button is-warning is-secondary" v-on:click="exportSaveFile()">匯出所有已匯入的資料</button>
+      
+      <br v-if="openDescription" ><br v-if="openDescription" >
+      <A1 v-if="openDescription" ><strong > 以下表格資料為 <a style="color: crimson;">隨機生成</a>，其生成資料為供使用者測試用，請按<a style="color: indianred;" v-on:click="clearAllItem()" >清除所有資料按鈕</a>後使用</strong></A1>
+      <br v-if="openDescription" >
+      <A1 v-if="openDescription" ><strong > 選擇對應項目後，系統會自動排除相同時間科目而不顯示，使用者可以再選擇剩下科目而不會發生衝突，如此類推</strong></A1>
+      <br><br>
+      <A1 v-if="openSelectedlist" ><strong > 目前頁面: <a style="color: indianred;">已選取資料</a></strong></A1>
+      <A1 v-if="!openSelectedlist" ><strong > 目前頁面: <a style="color: indianred;">所有資料</a></strong></A1>
+      
+      <br>
+      <A1><strong > 目前已選學分 : <a style="color: indianred;"> {{countcredit}}</a></strong></A1>
+    </nav>
+    
+
+    <div class="m-table">
+      <table class="table is-bordered is-striped is-narrow">
+        <tr>
+          <th class="m-table-index">#</th>
+          <th>課程代號</th>
+          <th>課程名稱</th>
+          <th>第一節</th>
+          <th>第二節</th>
+          <th>第三節</th>
+          <th>分</th>
+          <th>類型</th>
+          <th v-if="!openSelectedlist">選取/刪除</th>
+        </tr>
+
+        <tr v-for="item in paginatedItems">
+          <td>{{item.key}}</td>
+          <td>{{item.name}}</td>
+          <td>{{item.names}}</td>
+          <td>{{item.email}}</td>
+          <td>{{item.address}}</td>
+          <td>{{item.phone}}</td>
+          <td class="m-table-index">{{item.credit}}</td>
+          <td>{{item.lessonType}}</td>
+
+          <td v-if="!openSelectedlist">
+            <h5 class="button is-info is-outlined" v-on:click="selectItem(item)">Select</h5>
+            <a  class="button is-danger is-outlined" v-on:click="deleteItem(item)">Delete</a>
+          </td>
+        </tr>
+      </table>
+    </div>
+    <a v-if="openSelectedlist" >時間表</a>    
+    <a v-if="openSelectedlist"  v-on:click="toggleexcludehandup()"> 特定排除開關</a>
+    <a v-if="openSelectedlist"  v-on:click="openoffsatsunfunc()"> 顯示隱藏六日開關</a>
+    <table v-show="openSelectedlist" class="table is-bordered is-striped is-narrow">
+
+      <tr>
+        <th>節</th>
+        <th v-if="openoffsatsun" >星期日</th>
+        <th>星期一</th>
+        <th>星期二</th>
+        <th>星期三</th>
+        <th>星期四</th>
+        <th>星期五</th>
+        <th v-if="openoffsatsun" >星期六</th>
+      </tr>
+      
+      <tr>
+        <td>零(無上課時間)</td>
+        <td v-if="openoffsatsun" class="tt00" style="color:#black" v-on:click="exclude('(日)00',timeTable[0][0],'tt00')" >{{timeTable[0][0]}}</td>
+        <td class="tt10" style="color:#black" v-on:click="exclude('(一)00',timeTable[1][0],'tt10')" >{{timeTable[1][0]}}</td>
+        <td class="tt20" style="color:#black" v-on:click="exclude('(二)00',timeTable[2][0],'tt20')" >{{timeTable[2][0]}}</td>
+        <td class="tt30" style="color:#black" v-on:click="exclude('(三)00',timeTable[3][0],'tt30')" >{{timeTable[3][0]}}</td>
+        <td class="tt40" style="color:#black" v-on:click="exclude('(四)00',timeTable[4][0],'tt40')" >{{timeTable[4][0]}}</td>
+        <td class="tt50" style="color:#black" v-on:click="exclude('(五)00',timeTable[5][0],'tt50')" >{{timeTable[5][0]}}</td>
+        <td v-if="openoffsatsun" class="tt60" style="color:#black" v-on:click="exclude('(六)00',timeTable[6][0],'tt60')" >{{timeTable[6][0]}}</td>
+      </tr>
+
+      <tr>
+        <td>一(08:10-09:00)</td>
+        <td v-if="openoffsatsun" class="tt01" style="color:#black" v-on:click="exclude('(日)01',timeTable[0][1],'tt01')" >{{timeTable[0][1]}}</td>
+        <td class="tt11" style="color:#black" v-on:click="exclude('(一)01',timeTable[1][1],'tt11')" >{{timeTable[1][1]}}</td>
+        <td class="tt21" style="color:#black" v-on:click="exclude('(二)01',timeTable[2][1],'tt21')" >{{timeTable[2][1]}}</td>
+        <td class="tt31" style="color:#black" v-on:click="exclude('(三)01',timeTable[3][1],'tt31')" >{{timeTable[3][1]}}</td>
+        <td class="tt41" style="color:#black" v-on:click="exclude('(四)01',timeTable[4][1],'tt41')" >{{timeTable[4][1]}}</td>
+        <td class="tt51" style="color:#black" v-on:click="exclude('(五)01',timeTable[5][1],'tt51')" >{{timeTable[5][1]}}</td>
+        <td v-if="openoffsatsun" class="tt61" style="color:#black" v-on:click="exclude('(六)01',timeTable[6][1],'tt61')" >{{timeTable[6][1]}}</td>
+      </tr>
+
+      <tr>
+        <td>二(09:10-10:00)</td>
+        <td  v-if="openoffsatsun" class="tt02" style="color:#black" v-on:click="exclude('(日)02', timeTable[0][2],'tt02')">{{timeTable[0][2]}}</td>
+        <td  class="tt12" style="color:#black" v-on:click="exclude('(一)02', timeTable[1][2],'tt12')">{{timeTable[1][2]}}</td>
+        <td  class="tt22" style="color:#black" v-on:click="exclude('(二)02', timeTable[2][2],'tt22')">{{timeTable[2][2]}}</td>
+        <td  class="tt32" style="color:#black" v-on:click="exclude('(三)02', timeTable[3][2],'tt32')">{{timeTable[3][2]}}</td>
+        <td  class="tt42" style="color:#black" v-on:click="exclude('(四)02', timeTable[4][2],'tt42')">{{timeTable[4][2]}}</td>
+        <td  class="tt52" style="color:#black" v-on:click="exclude('(五)02', timeTable[5][2],'tt52')">{{timeTable[5][2]}}</td>
+        <td  v-if="openoffsatsun" class="tt62" style="color:#black" v-on:click="exclude('(六)02', timeTable[6][2],'tt62')">{{timeTable[6][2]}}</td>
+      </tr>
+
+      <tr>
+        <td>三(10:10-11:00)</td>
+        <td v-if="openoffsatsun" class="tt03" style="color:#black" v-on:click="exclude('(日)03', timeTable[0][3],'tt03')" >{{timeTable[0][3]}}</td>
+        <td class="tt13" style="color:#black" v-on:click="exclude('(一)03', timeTable[1][3],'tt13')" >{{timeTable[1][3]}}</td>
+        <td class="tt23" style="color:#black" v-on:click="exclude('(二)03', timeTable[2][3],'tt23')" >{{timeTable[2][3]}}</td>
+        <td class="tt33" style="color:#black" v-on:click="exclude('(三)03', timeTable[3][3],'tt33')" >{{timeTable[3][3]}}</td>
+        <td class="tt43" style="color:#black" v-on:click="exclude('(四)03', timeTable[4][3],'tt43')" >{{timeTable[4][3]}}</td>
+        <td class="tt53" style="color:#black" v-on:click="exclude('(五)03', timeTable[5][3],'tt53')" >{{timeTable[5][3]}}</td>
+        <td v-if="openoffsatsun" class="tt63" style="color:#black" v-on:click="exclude('(六)03', timeTable[6][3],'tt63')" >{{timeTable[6][3]}}</td>
+      </tr>
+
+      <tr>
+        <td>四(11:10-12:00)</td>
+        <td v-if="openoffsatsun" class="tt04" style="color:#black" v-on:click="exclude('(日)04', timeTable[0][4],'tt04')" >{{timeTable[0][4]}}</td>
+        <td class="tt14" style="color:#black" v-on:click="exclude('(一)04', timeTable[1][4],'tt14')" >{{timeTable[1][4]}}</td>
+        <td class="tt24" style="color:#black" v-on:click="exclude('(二)04', timeTable[2][4],'tt24')" >{{timeTable[2][4]}}</td>
+        <td class="tt34" style="color:#black" v-on:click="exclude('(三)04', timeTable[3][4],'tt34')" >{{timeTable[3][4]}}</td>
+        <td class="tt44" style="color:#black" v-on:click="exclude('(四)04', timeTable[4][4],'tt44')" >{{timeTable[4][4]}}</td>
+        <td class="tt54" style="color:#black" v-on:click="exclude('(五)04', timeTable[5][4],'tt54')" >{{timeTable[5][4]}}</td>
+        <td v-if="openoffsatsun" class="tt64" style="color:#black" v-on:click="exclude('(六)04', timeTable[6][4],'tt64')" >{{timeTable[6][4]}}</td>
+      </tr>
+
+
+      <tr>
+        <td>五(午休)(12:10-13:00)</td>
+        <td v-if="openoffsatsun" class="tt05" style="color:#black" v-on:click="exclude('(日)05', timeTable[0][5],'tt05')" >{{timeTable[0][5]}}</td>
+        <td class="tt15" style="color:#black" v-on:click="exclude('(一)05', timeTable[1][5],'tt15')" >{{timeTable[1][5]}}</td>
+        <td class="tt25" style="color:#black" v-on:click="exclude('(二)05', timeTable[2][5],'tt25')" >{{timeTable[2][5]}}</td>
+        <td class="tt35" style="color:#black" v-on:click="exclude('(三)05', timeTable[3][5],'tt35')" >{{timeTable[3][5]}}</td>
+        <td class="tt45" style="color:#black" v-on:click="exclude('(四)05', timeTable[4][5],'tt45')" >{{timeTable[4][5]}}</td>
+        <td class="tt55" style="color:#black" v-on:click="exclude('(五)05', timeTable[5][5],'tt55')" >{{timeTable[5][5]}}</td>
+        <td v-if="openoffsatsun" class="tt65" style="color:#black" v-on:click="exclude('(六)05', timeTable[6][5],'tt65')" >{{timeTable[6][5]}}</td>
+      </tr>
+
+
+      <tr>
+        <td>六(13:10-14:00)</td>
+        <td v-if="openoffsatsun" class="tt06" style="color:#black" v-on:click="exclude('(日)06', timeTable[0][6],'tt06')" >{{timeTable[0][6]}}</td>
+        <td class="tt16" style="color:#black" v-on:click="exclude('(一)06', timeTable[1][6],'tt16')" >{{timeTable[1][6]}}</td>
+        <td class="tt26" style="color:#black" v-on:click="exclude('(二)06', timeTable[2][6],'tt26')" >{{timeTable[2][6]}}</td>
+        <td class="tt36" style="color:#black" v-on:click="exclude('(三)06', timeTable[3][6],'tt36')" >{{timeTable[3][6]}}</td>
+        <td class="tt46" style="color:#black" v-on:click="exclude('(四)06', timeTable[4][6],'tt46')" >{{timeTable[4][6]}}</td>
+        <td class="tt56" style="color:#black" v-on:click="exclude('(五)06', timeTable[5][6],'tt56')" >{{timeTable[5][6]}}</td>
+        <td v-if="openoffsatsun" class="tt66" style="color:#black" v-on:click="exclude('(六)06', timeTable[6][6],'tt66')" >{{timeTable[6][6]}}</td>
+      </tr>
+
+      <tr>
+        <td>七(14:10-15:00)</td>
+        <td v-if="openoffsatsun" class="tt07" style="color:#black" v-on:click="exclude('(日)07', timeTable[0][7],'tt07')" >{{timeTable[0][7]}}</td>
+        <td class="tt17" style="color:#black" v-on:click="exclude('(一)07', timeTable[1][7],'tt17')" >{{timeTable[1][7]}}</td>
+        <td class="tt27" style="color:#black" v-on:click="exclude('(二)07', timeTable[2][7],'tt27')" >{{timeTable[2][7]}}</td>
+        <td class="tt37" style="color:#black" v-on:click="exclude('(三)07', timeTable[3][7],'tt37')" >{{timeTable[3][7]}}</td>
+        <td class="tt47" style="color:#black" v-on:click="exclude('(四)07', timeTable[4][7],'tt47')" >{{timeTable[4][7]}}</td>
+        <td class="tt57" style="color:#black" v-on:click="exclude('(五)07', timeTable[5][7],'tt57')" >{{timeTable[5][7]}}</td>
+        <td v-if="openoffsatsun" class="tt67" style="color:#black" v-on:click="exclude('(六)07', timeTable[6][7],'tt67')" >{{timeTable[6][7]}}</td>
+      </tr>
+
+      <tr>
+        <td>八(15:10-16:00)</td>
+        <td v-if="openoffsatsun" class="tt08" style="color:#black" v-on:click="exclude('(日)08', timeTable[0][8],'tt08')" >{{timeTable[0][8]}}</td>
+        <td class="tt18" style="color:#black" v-on:click="exclude('(一)08', timeTable[1][8],'tt18')" >{{timeTable[1][8]}}</td>
+        <td class="tt28" style="color:#black" v-on:click="exclude('(二)08', timeTable[2][8],'tt28')" >{{timeTable[2][8]}}</td>
+        <td class="tt38" style="color:#black" v-on:click="exclude('(三)08', timeTable[3][8],'tt38')" >{{timeTable[3][8]}}</td>
+        <td class="tt48" style="color:#black" v-on:click="exclude('(四)08', timeTable[4][8],'tt48')" >{{timeTable[4][8]}}</td>
+        <td class="tt58" style="color:#black" v-on:click="exclude('(五)08', timeTable[5][8],'tt58')" >{{timeTable[5][8]}}</td>
+        <td v-if="openoffsatsun" class="tt68" style="color:#black" v-on:click="exclude('(六)08', timeTable[6][8],'tt68')" >{{timeTable[6][8]}}</td>
+      </tr>
+
+
+      <tr>
+        <td>九(16:10-17:00)</td>
+        <td v-if="openoffsatsun" class="tt09" style="color:#black" v-on:click="exclude('(日)09', timeTable[0][9],'tt09')">{{timeTable[0][9]}}</td>
+        <td class="tt19" style="color:#black" v-on:click="exclude('(一)09', timeTable[1][9],'tt19')">{{timeTable[1][9]}}</td>
+        <td class="tt29" style="color:#black" v-on:click="exclude('(二)09', timeTable[2][9],'tt29')">{{timeTable[2][9]}}</td>
+        <td class="tt39" style="color:#black" v-on:click="exclude('(三)09', timeTable[3][9],'tt39')">{{timeTable[3][9]}}</td>
+        <td class="tt49" style="color:#black" v-on:click="exclude('(四)09', timeTable[4][9],'tt49')">{{timeTable[4][9]}}</td>
+        <td class="tt59" style="color:#black" v-on:click="exclude('(五)09', timeTable[5][9],'tt59')">{{timeTable[5][9]}}</td>
+        <td v-if="openoffsatsun" class="tt69" style="color:#black" v-on:click="exclude('(六)09', timeTable[6][9],'tt69')">{{timeTable[6][9]}}</td>
+      </tr>
+
+      <tr>
+        <td>十(17:10-18:00)</td>
+        <td v-if="openoffsatsun" class="tt010" style="color:#black" v-on:click="exclude('(日)10',timeTable[0][10],'tt010')">{{timeTable[0][10]}}</td>
+        <td class="tt110" style="color:#black" v-on:click="exclude('(一)10',timeTable[1][10],'tt110')">{{timeTable[1][10]}}</td>
+        <td class="tt210" style="color:#black" v-on:click="exclude('(二)10',timeTable[2][10],'tt210')">{{timeTable[2][10]}}</td>
+        <td class="tt310" style="color:#black" v-on:click="exclude('(三)10',timeTable[3][10],'tt310')">{{timeTable[3][10]}}</td>
+        <td class="tt410" style="color:#black" v-on:click="exclude('(四)10',timeTable[4][10],'tt410')">{{timeTable[4][10]}}</td>
+        <td class="tt510" style="color:#black" v-on:click="exclude('(五)10',timeTable[5][10],'tt510')">{{timeTable[5][10]}}</td>
+        <td v-if="openoffsatsun" class="tt610" style="color:#black" v-on:click="exclude('(六)10',timeTable[6][10],'tt610')">{{timeTable[6][10]}}</td>
+      </tr>
+
+      <tr>
+        <td>十一(18:30-19:20)</td>
+        <td v-if="openoffsatsun" class="tt011" style="color:#black" v-on:click="exclude('(日)11', timeTable[0][11],'tt011')">{{timeTable[0][11]}}</td>
+        <td class="tt111" style="color:#black" v-on:click="exclude('(一)11', timeTable[1][11],'tt111')">{{timeTable[1][11]}}</td>
+        <td class="tt211" style="color:#black" v-on:click="exclude('(二)11', timeTable[2][11],'tt211')">{{timeTable[2][11]}}</td>
+        <td class="tt311" style="color:#black" v-on:click="exclude('(三)11', timeTable[3][11],'tt311')">{{timeTable[3][11]}}</td>
+        <td class="tt411" style="color:#black" v-on:click="exclude('(四)11', timeTable[4][11],'tt411')">{{timeTable[4][11]}}</td>
+        <td class="tt511" style="color:#black" v-on:click="exclude('(五)11', timeTable[5][11],'tt511')">{{timeTable[5][11]}}</td>
+        <td v-if="openoffsatsun" class="tt611" style="color:#black" v-on:click="exclude('(六)11', timeTable[6][11],'tt611')">{{timeTable[6][11]}}</td>
+      </tr>
+
+      <tr>
+        <td>十二(19:25-20:15)</td>
+        <td v-if="openoffsatsun" class="tt012" style="color:#black" v-on:click="exclude('(日)12',timeTable[0][12],'tt012')" >{{timeTable[0][12]}}</td>
+        <td class="tt112" style="color:#black" v-on:click="exclude('(一)12',timeTable[1][12],'tt112')" >{{timeTable[1][12]}}</td>
+        <td class="tt212" style="color:#black" v-on:click="exclude('(二)12',timeTable[2][12],'tt212')" >{{timeTable[2][12]}}</td>
+        <td class="tt312" style="color:#black" v-on:click="exclude('(三)12',timeTable[3][12],'tt312')" >{{timeTable[3][12]}}</td>
+        <td class="tt412" style="color:#black" v-on:click="exclude('(四)12',timeTable[4][12],'tt412')" >{{timeTable[4][12]}}</td>
+        <td class="tt512" style="color:#black" v-on:click="exclude('(五)12',timeTable[5][12],'tt512')" >{{timeTable[5][12]}}</td>
+        <td v-if="openoffsatsun" class="tt612" style="color:#black" v-on:click="exclude('(六)12',timeTable[6][12],'tt612')" >{{timeTable[6][12]}}</td>
+      </tr>
+
+      <tr>
+        <td>十三(20:25-21:15)</td>
+        <td v-if="openoffsatsun" class="tt013" style="color:#black" v-on:click="exclude('(日)13',timeTable[0][13],'tt013')">{{timeTable[0][13]}}</td>
+        <td class="tt113" style="color:#black" v-on:click="exclude('(一)13',timeTable[1][13],'tt113')">{{timeTable[1][13]}}</td>
+        <td class="tt213" style="color:#black" v-on:click="exclude('(二)13',timeTable[2][13],'tt213')">{{timeTable[2][13]}}</td>
+        <td class="tt313" style="color:#black" v-on:click="exclude('(三)13',timeTable[3][13],'tt313')">{{timeTable[3][13]}}</td>
+        <td class="tt413" style="color:#black" v-on:click="exclude('(四)13',timeTable[4][13],'tt413')">{{timeTable[4][13]}}</td>
+        <td class="tt513" style="color:#black" v-on:click="exclude('(五)13',timeTable[5][13],'tt513')">{{timeTable[5][13]}}</td>
+        <td v-if="openoffsatsun" class="tt613" style="color:#black" v-on:click="exclude('(六)13',timeTable[6][13],'tt613')">{{timeTable[6][13]}}</td>
+      </tr> 
+
+      <tr>
+        <td>十四(21:20-22:10)</td>
+        <td v-if="openoffsatsun" class="tt014" style="color:#black" v-on:click="exclude('(日)14',timeTable[0][14],'tt014')" >{{timeTable[0][14]}}</td>
+        <td class="tt114" style="color:#black" v-on:click="exclude('(一)14',timeTable[1][14],'tt114')" >{{timeTable[1][14]}}</td>
+        <td class="tt214" style="color:#black" v-on:click="exclude('(二)14',timeTable[2][14],'tt214')" >{{timeTable[2][14]}}</td>
+        <td class="tt314" style="color:#black" v-on:click="exclude('(三)14',timeTable[3][14],'tt314')" >{{timeTable[3][14]}}</td>
+        <td class="tt414" style="color:#black" v-on:click="exclude('(四)14',timeTable[4][14],'tt414')" >{{timeTable[4][14]}}</td>
+        <td class="tt514" style="color:#black" v-on:click="exclude('(五)14',timeTable[5][14],'tt514')" >{{timeTable[5][14]}}</td>
+        <td v-if="openoffsatsun" class="tt614" style="color:#black" v-on:click="exclude('(六)14',timeTable[6][14],'tt614')" >{{timeTable[6][14]}}</td>
+      </tr>
+    </table>
+
+
+  </div>
+ 
+  <style>
+    #app {
+      padding: 40px 0;
+    }
+
+    .m-pagination .is-space {
+      width: 20px;
+    }
+
+    .m-table {
+      margin-top: 20px;
+    }
+
+    .m-table tr th {
+      background: #c0c0c0;
+      color: #393939;
+    }
+
+    .m-table-index {
+      width: 20px;
+    }
+
+    .m-tags-items {
+      margin-top: 5px;
+      height: 60px;
+      overflow-y: scroll;
+    }
+
+    .m-tags-items .tag {
+      margin-bottom: 5px;
+      margin-right: 3px;
+    }
+  </style>
+
+  <script>
+    let items = []; //`${chance.natural({ min: 500, max: 1000 })}`
+    for (let i = 0; i <10  ; i++) {
+      let origin = [];
+      for (let  j = 0; j <10 ; j++) {
+        origin[j] = `(${chance.character({ pool: '一二三四五' })})` + '0' +
+          `${chance.natural({ min: 1, max: 9 })}`;
+      }
+      var result = origin.filter(function(element, index, arr){
+          return arr.indexOf(element) === index;
+      });
+
+      items.push({
+        key: i + 1,
+        ssn: chance.ssn(), // SSN as person ID
+        name: `${chance.natural({ min: 1000, max: 9999 })}`,
+        names: '模擬' + chance.sentence({ words: 1 })+ '_' +chance.sentence({ words: 1 }),
+        email: result[0],
+        address: result[1],
+        phone: result[2],
+        credit : 
+          chance.natural({ min : 1, max : 9}),
+        selected: false,
+        lessonType : `${chance.character({ pool: '選必' })}` + '修',
+      });
+    }
+    var XL_row_object = [];
+    $(document).ready(function () {
+      $("#fileUploader").change(function (evt) {
+        var selectedFile = evt.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function (event) {
+          var data = event.target.result;
+          var workbook = XLSX.read(data, {
+            type: 'binary'
+          });
+          workbook.SheetNames.forEach(function (sheetName) {
+            XL_row_object = XLSX.utils.sheet_to_row_object_array(workbook.Sheets[sheetName]);
+            if (XL_row_object.length > 0) {
+              //  document.getElementById("jsonObject").innerHTML = JSON.stringify(XL_row_object);
+            }
+          })
+        };
+        reader.onerror = function (event) {
+          console.error("File could not be read! Code " + event.target.error.code);
+        };
+        reader.readAsBinaryString(selectedFile);
+      });
+    });
+
+    Vue.filter("numeral", function (value) {
+      return numeral(value).format("0,0");
+    });
+
+    new Vue({
+      el: "#app",
+      data: {
+        exclude9999: 9999,
+        branchselectvalue: '',
+        branchimportswitch: false,
+        branchimport: [],
+        saves: [],
+        openoffsatsun: false,
+        coursenumber1 : [],
+        conflict2 :[],
+        eachee: [],
+        CCtable: false,
+        lessonType: undefined,
+        teachername: '',
+        toggleexcludehandups : false,
+        addcourse: true,
+        countcredit : 0,
+        timeTableOpen : true,
+        timeTable : [['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',]],
+        conf: false,
+        AIKeyInAddNumber : 1,
+        AIKeyInBatchOpen : false,
+        AIKeyInBatch : undefined,
+        openDescription :  true ,
+        openSelectedlist : false ,
+        coursename: undefined,
+        lessonCode: undefined,
+        scheduleTime1: undefined,
+        scheduleTime2: undefined,
+        scheduleTime3: undefined,
+        credit : undefined,
+        searchItem: undefined,
+        AIKeyIn: undefined,
+        items: items,
+        filteredItems: [],
+        paginatedItems: [],
+        eachCCs:  [],
+        eachCCsHTML :undefined,
+        selectedItems: [],
+        pagination: {
+          range: 5,
+          currentPage: 1,
+          itemPerPage: 10000,
+          items: [],
+          filteredItems: [],
+        },
+      },
+      ready() {
+        this.filteredItems = this.items;
+        this.buildPagination();
+        this.selectPage(1);
+      },
+      computed: {
+        selectedvforshowexclude: function() {
+          let result = this.selectedItems.filter(function(item) {
+            return item.timeExcludeShow == false;
+          });
+          return result.length;
+        },
+        selectedvfor: function() {
+          return this.selectedItems.filter(function(item) {
+            return item.timeExcludeShow != false;
+          });
+        },
+        selectedvforexcludeshow: function() {
+          return this.selectedItems.filter(function(item) {
+            return item.timeExcludeShow == false;
+          });
+        },
+        saveslength: function() {
+          return this.saves.length;
+        },
+      },
+      methods: {
+        branchimportswitchs(){
+          this.branchimportswitch = !this.branchimportswitch;
+        },
+        openoffsatsunfunc(){
+            this.openoffsatsun = !this.openoffsatsun;
+        },
+        toggleexcludehandup(){
+          if(this.toggleexcludehandups == false){
+              document.querySelectorAll('td').forEach(item=>{
+                  if(item.innerHTML.indexOf("0000") !== -1) item.style.color = "#F1ECEC"
+              })
+          }else{
+              document.querySelectorAll('td').forEach(item=>{
+                if(item.innerHTML.indexOf("0000") !== -1) item.style.color = "black"
+              })
+          }
+          this.toggleexcludehandups = !this.toggleexcludehandups;
+        },
+        exclude(excludetime,exist,classname){
+          if(exist == ''){
+            this.exclude9999 = this.exclude9999 -1 ;
+            this.lessonCode = this.exclude9999;
+            this.coursename = '*' + excludetime +'*';
+            this.scheduleTime1 = excludetime ; 
+            this.scheduleTime2 = '';
+            this.scheduleTime3 = '';
+            this.credit = '0';
+            this.submitCourse();
+            this.paginatedItems[this.paginatedItems.length - 1].timeExcludeShow = false;
+            this.selectItem(this.paginatedItems[this.paginatedItems.length - 1]);
+            this.showAlreadySelect();
+
+            let timeSave =this.timeTable;   // 立即顯示
+            this.timeTable = 0;
+            this.timeTable = timeSave;
+               document.getElementsByClassName(classname)[0].style.color ="#F1ECEC";
+          }
+
+        },
+        // timeTableOpenfunc(){
+        //   this.timeTableOpen = !this.timeTableOpen;
+        // },
+        timeTablefunc(time){
+
+          let l1w = time.email.split(')')
+          let l2w = time.address.split(')')
+          let l3w = time.phone.split(')')
+
+          l1w[0] =  l1w[0].replace("(","");   // 星期
+          l2w[0] =  l2w[0].replace("(","");
+          l3w[0] =  l3w[0].replace("(","");
+ 
+          l1w[1] = parseInt(l1w[1]);      // 節數
+          l2w[1] = parseInt(l2w[1]);
+          l3w[1] = parseInt(l3w[1]);
+
+          if(l1w[0] == '日'){ 
+              if(this.timeTable[0][l1w[1]] == ''){
+                this.timeTable[0][l1w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }  //time 1
+            } else if(l1w[0] == '一'){
+              if(this.timeTable[1][l1w[1]] == ''){
+                this.timeTable[1][l1w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }  //time 1
+            } else if(l1w[0] == '二'){  
+              if(this.timeTable[2][l1w[1]] == ''){
+                this.timeTable[2][l1w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }  
+            } else if(l1w[0] == '三'){
+              if(this.timeTable[3][l1w[1]] == ''){
+               this.timeTable[3][l1w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }  
+            } else if(l1w[0] == '四'){
+              if(this.timeTable[4][l1w[1]] == ''){
+               this.timeTable[4][l1w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }  
+            } else if(l1w[0] == '五'){
+              if(this.timeTable[5][l1w[1]] == ''){
+                this.timeTable[5][l1w[1]]  = time.name + ' ' + time.names;   
+              }else{
+                return 0;
+              }  
+            } else if(l1w[0] == '六'){
+              if(this.timeTable[6][l1w[1]] == ''){
+               this.timeTable[6][l1w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }  
+          }
+          
+          if(l2w[0] == '日'){    //time 2
+              if(this.timeTable[0][l2w[1]] == ''){
+                this.timeTable[0][l2w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }  
+            } else if(l2w[0] == '一'){
+              if(this.timeTable[1][l2w[1]] == ''){
+               this.timeTable[1][l2w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l2w[0] == '二'){
+              if(this.timeTable[2][l2w[1]] == ''){
+                this.timeTable[2][l2w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l2w[0] == '三'){
+              if(this.timeTable[3][l2w[1]] == ''){
+                this.timeTable[3][l2w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l2w[0] == '四'){
+              if(this.timeTable[4][l2w[1]] == ''){
+               this.timeTable[4][l2w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l2w[0] == '五'){
+              if(this.timeTable[5][l2w[1]] == ''){
+                this.timeTable[5][l2w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l2w[0] == '六'){
+              if(this.timeTable[6][l2w[1]] == ''){
+               this.timeTable[6][l2w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+          }
+          if(l3w[0] == '日'){  //time 3
+              if(this.timeTable[0][l3w[1]] == ''){
+                this.timeTable[0][l3w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l3w[0] == '一'){
+              if(this.timeTable[1][l3w[1]] == ''){
+                this.timeTable[1][l3w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l3w[0] == '二'){
+              if(this.timeTable[2][l3w[1]] == ''){
+               this.timeTable[2][l3w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l3w[0] == '三'){
+              if(this.timeTable[3][l3w[1]] == ''){
+               this.timeTable[3][l3w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l3w[0] == '四'){
+              if(this.timeTable[4][l3w[1]] == ''){
+                this.timeTable[4][l3w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l3w[0] == '五'){
+              if(this.timeTable[5][l3w[1]] == ''){
+                this.timeTable[5][l3w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+            } else if(l3w[0] == '六'){
+              if(this.timeTable[6][l3w[1]] == ''){
+                this.timeTable[6][l3w[1]]  = time.name + ' ' + time.names; 
+              }else{
+                return 0;
+              }
+          }
+            let timeSave =this.timeTable;   // 立即顯示
+            this.timeTable = 0;
+            this.timeTable = timeSave;
+        },
+        timeTableDelfunc(time){
+
+          let l1w = time.email.split(')')
+          let l2w = time.address.split(')')
+          let l3w = time.phone.split(')')
+
+          l1w[0] =  l1w[0].replace("(","");   // 星期
+          l2w[0] =  l2w[0].replace("(","");
+          l3w[0] =  l3w[0].replace("(","");
+
+          l1w[1] = parseInt(l1w[1]);      // 節數
+          l2w[1] = parseInt(l2w[1]);
+          l3w[1] = parseInt(l3w[1]);
+
+          if(l1w[0] == '日'){    //time 1
+              this.timeTable[0][l1w[1]]  = ''; 
+            } else if(l1w[0] == '一'){
+              this.timeTable[1][l1w[1]]  = '';
+            } else if(l1w[0] == '二'){
+              this.timeTable[2][l1w[1]]  = '';
+            } else if(l1w[0] == '三'){
+              this.timeTable[3][l1w[1]]  = '';
+            } else if(l1w[0] == '四'){
+              this.timeTable[4][l1w[1]]  = '';
+            } else if(l1w[0] == '五'){
+              this.timeTable[5][l1w[1]]  = ''; 
+            } else if(l1w[0] == '六'){
+              this.timeTable[6][l1w[1]]  = '';
+          }
+
+          if(l2w[0] == '日'){    //time 2
+              this.timeTable[0][l2w[1]]  = '';
+            } else if(l2w[0] == '一'){
+              this.timeTable[1][l2w[1]]  = '';
+            } else if(l2w[0] == '二'){
+              this.timeTable[2][l2w[1]]  = '';
+            } else if(l2w[0] == '三'){
+              this.timeTable[3][l2w[1]]  = '';
+            } else if(l2w[0] == '四'){
+              this.timeTable[4][l2w[1]]  = '';
+            } else if(l2w[0] == '五'){
+              this.timeTable[5][l2w[1]]  = '';
+            } else if(l2w[0] == '六'){
+              this.timeTable[6][l2w[1]]  = '';
+          }
+
+          if(l3w[0] == '日'){    //time 3
+              this.timeTable[0][l3w[1]]  = '';
+            } else if(l3w[0] == '一'){
+              this.timeTable[1][l3w[1]]  = '';
+            } else if(l3w[0] == '二'){
+              this.timeTable[2][l3w[1]]  = '';
+            } else if(l3w[0] == '三'){
+              this.timeTable[3][l3w[1]]  = '';
+            } else if(l3w[0] == '四'){
+              this.timeTable[4][l3w[1]]  = '';
+            } else if(l3w[0] == '五'){
+              this.timeTable[5][l3w[1]]  = '';
+            } else if(l3w[0] == '六'){
+              this.timeTable[6][l3w[1]]  = '';
+            }
+            
+            let timeSave =this.timeTable;
+            this.timeTable = 0;
+            this.timeTable = timeSave;
+          },
+
+        SCCouse(item){
+          if(item == 2){
+             this.conf = false;
+          } else{
+            this.conf = true;
+            let Mm = item.name +' '+ item.names ;
+            this.eachCCsHTML= item.conflict;
+            for (let index = 0; index < this.eachCCsHTML.length; index++) {
+              if(this.eachCCsHTML[index].indexOf(Mm) > -1){
+                this.eachCCsHTML.splice(index,1);
+              }
+            }
+              this.CCtable = false;
+          }
+          
+        },
+        SCCouse2(item){
+          let xrecover;
+          if(item == 2){
+            this.CCtable = false;
+            return;
+          }
+          for (let i = 0; i < item.conflict2.length; i++) {
+              if(item.name == item.conflict2[i][0]){
+                xrecover = item.conflict2[0];
+                item.conflict2[0] = item.conflict2[i] ;
+                item.conflict2[i] = xrecover;
+                item.conflict2.shift();   //移除第一項資料
+              }
+          }
+          this.coursenumber1 = [];
+          this.coursenumber1.push(item.name, item.names,item.email,item.address,item.phone,item.credit,item.lessonType)
+          
+          this.conflict2 = [];
+          this.CCtable = true;
+          this.conflict2 = item.conflict2;
+          //alert(JSON.stringify(item))
+        },
+        switchAIMultipleSingleKeyIn(){
+          if(this.AIKeyInBatchOpen == false){
+            this.AIKeyInBatchOpen = true;
+          }else if (this.AIKeyInBatchOpen ==true){
+            this.AIKeyInBatchOpen =false;
+          } 
+        },
+        exportSaveFile(){
+          let exportSaveFiles = '' ;
+          if(this.openSelectedlist == true){
+            exportSaveFiles = this.items.filter(function(item, index, array){
+              return item.selectedOutput == true && item.timeExcludeShow != false;       
+            });
+            if(this.selectedItems[0] == undefined){
+              alert("未選擇任何課程");
+              return ;
+            }
+          }else{
+            exportSaveFiles = this.items;
+          }
+    
+          let newArr = [];
+          exportSaveFiles.forEach(function(item, index, array){
+            newArr.push({課程代號 : item.name,
+            課程名稱 : item.names,
+            第一節 : item.email,
+            第二節 : item.address,
+            第三節 : item.phone,
+            學分: item.credit,
+            類型: item.lessonType,
+            });
+          });
+
+          var data1 = newArr;
+          var opts = [{sheetid:'One',header:true}];
+
+          if(this.openSelectedlist == true){
+          var res = alasql('SELECT * INTO XLSX("已選課表.xlsx",?) FROM ?',
+                          [opts,[data1]]);
+          }else{
+            var res = alasql('SELECT * INTO XLSX("所有已匯入的課表.xlsx",?) FROM ?',
+                          [opts,[data1]]);
+          }
+        },
+
+        clearSearchItem() {
+          this.searchItem = undefined;
+          this.searchInTheList("",this.pagination.currentPage);
+        },
+        submitCourse() {
+          
+     
+          let less = [];
+          less[0] = this.scheduleTime1 ;
+          less[1] = this.scheduleTime2 ;
+          less[2] = this.scheduleTime3 ;
+          
+          var result = less.filter(function(element, index, arr){
+              return arr.indexOf(element) === index;
+          });
+
+          this.scheduleTime1=result[0];
+          this.scheduleTime2=result[1];
+          this.scheduleTime3=result[2];
+
+          if (
+            this.lessonCode == undefined ||
+            this.lessonCode == null ||
+            this.lessonCode == ""
+          ) {
+            if(this.AIKeyInBatchOpen == true){
+              alert("請輸入課程代號");
+            }
+            return;
+          }
+
+          if (
+            this.coursename == undefined ||
+            this.coursename == null ||
+            this.coursename == ""
+          ) {
+            alert("請輸入課程名稱");
+            return;
+          }
+
+          if(this.AIKeyInBatchOpen == true){
+            if (
+              this.scheduleTime1 == undefined ||
+              this.scheduleTime1 == null ||
+              this.scheduleTime1 == ""
+            ) {
+              alert("至少輸入一節課表");
+              return;
+            }
+          }
+
+          if(this.credit.length !==  1){
+            alert("輸入的學分不得超過個位數");
+            return ;
+          }
+
+         
+          if (
+            this.scheduleTime1 == undefined ||
+            this.scheduleTime1 == null ||
+            this.scheduleTime1 == ""
+          ) {
+            this.scheduleTime1 = "****";
+          }else if(this.scheduleTime1.charAt(0) !== '('){
+            alert("輸入課程節數格式錯誤");
+            return ;
+          }
+
+          if (
+            this.scheduleTime2 == undefined ||
+            this.scheduleTime2 == null ||
+            this.scheduleTime2 == "" 
+          ) {
+            this.scheduleTime2 = "****";
+          }else if(this.scheduleTime2.charAt(0) !== '('){
+            alert("輸入課程節數格式錯誤");
+            return ;
+          }
+
+          if (
+            this.scheduleTime3 == undefined ||
+            this.scheduleTime3 == null ||
+            this.scheduleTime3 == ""
+          ) {
+            this.scheduleTime3 = "****";
+          }else if(this.scheduleTime3.charAt(0) !== '('){
+            alert("輸入課程節數格式錯誤");
+            return ;
+          }
+     
+          if (
+            this.credit == undefined ||
+            this.credit == null ||
+            this.credit == ""
+          ) {
+            this.credit = "****";
+          }
+  
+          this.scheduleTime1 = this.scheduleTime1.replace(/\s*/g,"");
+          this.scheduleTime2 = this.scheduleTime2.replace(/\s*/g,"");
+          this.scheduleTime3 = this.scheduleTime3.replace(/\s*/g,"");
+          this.credit = this.credit.replace(/\s*/g,"");
+      
+          this.items.push({
+            names: this.coursename,
+            ssn: chance.ssn(), // SSN as person ID
+            name: this.lessonCode,
+            email: this.scheduleTime1,
+            address: this.scheduleTime2,
+            phone: this.scheduleTime3,
+            credit : this.credit,
+            selected: false,
+            selectedOutput: false,
+            lessonType : this.lessonType,
+          });
+          this.searchInTheList4(0, this.pagination.items.length || this.pagination.items.length==0 );
+          this.lessonCode = undefined;
+          this.scheduleTime1 = undefined;
+          this.scheduleTime2 = undefined;
+          this.scheduleTime3 = undefined;
+          this.coursename = undefined;
+          this.credit = undefined ;
+          this.lessonType = undefined ;
+        },
+
+        checknumber(String){
+            var Letters = [0,1,2,3,4,5,6,7,8,9]; 
+            for(let i = 0; i< Letters.length; i ++ ){ 
+              if(String.charAt(0) == Letters[i]){
+                return true;
+              }
+            } 
+            return false; 
+        },
+        Numbers(val) {
+      　　if (parseFloat(val).toString() !== "NaN"  &&  val.indexOf(`/`) == -1 && this.checknumber(val)) {  //沒有等於-1  
+      　　　　return true;
+      　　} else {
+      　　　　return false;
+      　　}
+        },
+        AIKeyInBatchs(){
+          this.AIKeyInBatch = this.AIKeyInBatch.replace(/\s+/g, " ");
+          this.AIKeyInBatch = this.AIKeyInBatch.split(" ");
+          for (let index = 1; index < this.AIKeyInBatch.length ; index++) {
+             if(this.AIKeyInBatch[index].length == 4 && this.Numbers(this.AIKeyInBatch[index])){
+                let row = this.AIKeyInBatch.slice(0,index);
+                this.AIKeyIn = row ;
+                if(this.AIKeyIn[0].length == 4 && this.checknumber(this.AIKeyIn[0])){
+                  this.AIKeyInFunc();
+                  this.submitCourse();
+                  this.AIKeyInAddNumber = this.AIKeyInAddNumber + 1 ;
+                }
+                this.AIKeyInBatch.splice(0,index); 
+                index = 1;
+              }
+          }
+          this.AIKeyIn = this.AIKeyInBatch ;
+          this.AIKeyInFunc();
+          this.submitCourse();
+          this.AIKeyInBatch = '';
+          alert('已成功輸入'+ this.AIKeyInAddNumber  + '筆資料');
+          this.AIKeyInAddNumber = 1;
+        },
+        AIKeyInFunc() { 
+          this.lessonCode = undefined;
+          this.scheduleTime1 = undefined;
+          this.scheduleTime2 = undefined;
+          this.scheduleTime3 = undefined;
+          this.coursename = undefined;
+
+          if(this.AIKeyInBatchOpen == true){
+            this.AIKeyIn = this.AIKeyIn.replace(/\s+/g, " ");  
+            this.AIKeyIn = this.AIKeyIn.split(" ");
+           } 
+          
+          let AIALL = this.AIKeyIn ;
+           
+            
+          if(AIALL[2] == 'ver.1.11'){
+            this.AIKeyInAddNumber = this.AIKeyInAddNumber - 1  ;
+            return ;
+          }
+
+          for (let index = 0; index < AIALL.length; index++) {
+            if(AIALL[0].length !== 4){
+              AIALL.splice(0, 1);
+              if(AIALL[0].length == 4){
+                break;
+              }
+            }
+          }
+
+          if(AIALL[3].length !== 1){
+            if(AIALL[4].length == 1){
+              AIALL[3] = ' ';
+              this.credit = AIALL[4];
+            }
+          }
+         
+          if(AIALL[3].length == 1 && isNaN(AIALL[3]) == false && AIALL[3] !=' '){
+                this.credit = AIALL[3];
+          }else{
+            for (let i = 0; i < AIALL.length; i++) {
+              if(AIALL[i].length == 1 && isNaN(AIALL[i]) == false && AIALL[i] !=' '){
+                this.credit = AIALL[i];
+                break;
+              }
+            }
+          }
+
+          for (let index = 0; index < AIALL.length; index++) {
+            if(AIALL[index].indexOf('/') >= 0){
+              for (let z = 0; z < 9; z++) {
+                if(AIALL[index-1].indexOf(z) > -1){
+                  var yes= 1;
+                  break;
+                }
+              }
+              if(yes == 1){break;}else{
+                if(AIALL[index - 1].length > 9){
+                  this.teachername = '_' + AIALL[index - 1].slice(0, 2)+ '...';
+                }else{
+                  this.teachername = '_' + AIALL[index - 1];
+                }
+              }
+            }
+          }
+
+          if(AIALL[0].length == 4){
+            this.lessonCode = AIALL[0];
+            if(AIALL[2].charAt(0) !== '('){  //AI
+              this.coursename = AIALL[2].slice(0, 6)+ this.teachername;
+              for (let i = 3; i < AIALL.length; i++) {
+                if(AIALL[i].length == 2 ){
+                 if(AIALL[i].indexOf('必修') >-1 || AIALL[i].indexOf('選修') >-1){
+                  if(AIALL[i+1].indexOf('通識') > -1){
+                    this.lessonType = AIALL[i+1];
+                  }else{
+                    this.lessonType = AIALL[i];
+                  }
+                 }
+                }
+              }
+            }else{
+              this.coursename = AIALL[1]+ this.teachername;
+              this.lessonType = AIALL[6];
+              if(this.AIKeyInBatchOpen == true ){
+                alert('格式錯誤');
+              }
+            }
+          }
+          
+          
+          this.AIKeyIn = this.AIKeyIn.filter(function(item, index, array){
+              return item.charAt(0) == '(';    
+          });
+
+         
+          this.AIKeyIn = this.AIKeyIn.filter(function(element, index, arr){
+            return arr.indexOf(element) === index;
+          });
+          if(this.AIKeyIn[0] == undefined){
+
+            return ;
+          }
+          if(this.AIKeyIn[0].indexOf(`-`.toLowerCase()) > -1){ 
+            if(this.AIKeyIn[4] == undefined){
+              this.AIKeyIn[0] = this.AIKeyIn[0].split('-');
+              let last = this.AIKeyIn[0][0].split(')');
+              if(this.AIKeyIn[0][1] - last[1] == 1){  // == 1
+                this.scheduleTime1 = this.AIKeyIn[0][0]; 
+                this.scheduleTime2 = last[0] + ')' +  this.AIKeyIn[0][1]; 
+
+                if(this.AIKeyIn[1] !== undefined){
+                  if(this.AIKeyIn[1].indexOf(`-`.toLowerCase()) == -1 ){
+                    this.scheduleTime3 = this.AIKeyIn[1];
+                  }else{
+                    this.scheduleTime1 = '';
+                    this.scheduleTime2 = '';
+                    if(this.AIKeyInBatchOpen == true ){
+                      alert("課程節數超出範圍,請手動輸入課程");
+                    }
+                  }
+                }
+              }else if(this.AIKeyIn[0][1] - last[1] == 2){
+                this.scheduleTime1 = this.AIKeyIn[0][0]; 
+                let addZero = this.AIKeyIn[0][1] - 1 ;
+                addZero = addZero.toString();
+                if(addZero.length == 1 ){
+                  this.scheduleTime2 = last[0] + ')' + '0' + `${this.AIKeyIn[0][1] - 1}`;
+                }else{
+                  this.scheduleTime2 = last[0] + ')' + `${this.AIKeyIn[0][1] - 1}`;
+                }
+                this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[0][1];
+              }else{
+                if(this.AIKeyInBatchOpen == true ){
+                  alert("課程節數超出範圍,請手動輸入課程");
+                }
+              }
+            }else{
+              if(this.AIKeyInBatchOpen == true ){
+                  alert("課程節數超出範圍,請手動輸入課程");
+              }
+            }
+          }
+          else if(this.AIKeyIn[1] !== undefined){
+            if(this.AIKeyIn[1].indexOf(`-`.toLowerCase()) > -1){
+              this.AIKeyIn[1] = this.AIKeyIn[1].split('-');
+              let last = this.AIKeyIn[1][0].split(')');
+              if(this.AIKeyIn[1][1] - last[1] ==1){   
+                this.scheduleTime1 = this.AIKeyIn[0]; 
+                this.scheduleTime2 = this.AIKeyIn[1][0];
+                this.scheduleTime3 = last[0] + ')' +  this.AIKeyIn[1][1]; 
+              }else{
+                alert("課程節數超出範圍,請手動輸入課程")
+              }
+            }else{
+
+              this.scheduleTime1 = this.AIKeyIn[0]; 
+              this.scheduleTime2 = this.AIKeyIn[1]; 
+              this.scheduleTime3 = this.AIKeyIn[2];
+            }
+          }else{
+              this.scheduleTime1 = this.AIKeyIn[0]; 
+              this.scheduleTime2 = this.AIKeyIn[1]; 
+              this.scheduleTime3 = this.AIKeyIn[2];
+          }
+          this.AIKeyIn = '' ;
+          this.teachername ='';
+        },
+        showAlreadySelect(){
+          if (_.isUndefined()) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return v.selected && v.selectedOutput && v.timeExcludeShow !=false              
+            });
+            this.openSelectedlist = true ;
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return (
+                v.selected && v.selectedOutput && v.timeExcludeShow !=false
+              );
+            });
+
+            this.openSelectedlist = true ;
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined()) {
+            this.selectPage(1);
+          } else {
+            this.selectPage();
+          }
+        },
+        searchInTheList2(searchText, currentPage) {
+          let eachcc = [] ;
+          let eachee= [];
+          if (_.isUndefined(searchText)) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              if (v.email === searchText){
+                eachcc.push(v.name + ' ' + v.names+ ' ');
+                eachee.push(v.name + ' ' + v.names+ ' ' + v.email + ' ' + v.address+ ' '+v.phone + ' ' +v.credit + ' '+v.lessonType);
+                v.selected = true;
+              } else if (v.email.toLowerCase().indexOf(searchText.toLowerCase())> -1) { 
+                v.selected = true;
+                eachcc.push(v.name + ' ' + v.names+ ' ');
+                eachee.push(v.name + ' ' + v.names+ ' ' + v.email + ' ' + v.address+ ' '+v.phone + ' ' +v.credit + ' '+v.lessonType);
+
+              }
+
+              if (v.address === searchText){
+                v.selected = true;
+                eachcc.push(v.name + ' ' + v.names+ ' ');
+                eachee.push(v.name + ' ' + v.names+ ' ' + v.email + ' ' + v.address+ ' '+v.phone + ' ' +v.credit + ' '+v.lessonType);
+
+              } else if (v.address.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
+                v.selected = true;
+                eachcc.push(v.name + ' ' + v.names+ ' ');
+                eachee.push(v.name + ' ' + v.names+ ' ' + v.email + ' ' + v.address+ ' '+v.phone + ' ' +v.credit + ' '+v.lessonType);
+
+              }
+
+              if (v.phone === searchText){
+                v.selected = true;
+                eachcc.push(v.name + ' ' + v.names+ ' ');
+                eachee.push(v.name + ' ' + v.names+ ' ' + v.email + ' ' + v.address+ ' '+v.phone + ' ' +v.credit + ' '+v.lessonType);
+
+
+              } else if (v.phone.toLowerCase().indexOf(searchText.toLowerCase()) > -1) {
+                v.selected = true;
+                eachcc.push(v.name + ' ' + v.names+ ' ');
+                eachee.push(v.name + ' ' + v.names+ ' ' + v.email + ' ' + v.address+ ' '+v.phone + ' ' +v.credit + ' '+v.lessonType);
+
+              }
+              return v.selected == true;
+            });
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined(currentPage)) {
+            this.selectPage(1);
+          }else{
+             this.selectPage(currentPage) ;
+          }
+          this.eachCCs.push(eachcc);
+          this.eachCCs = [].concat.apply([], this.eachCCs);
+          this.eachee.push(eachee);
+          this.eachee = [].concat.apply([], this.eachee);
+          this.eachee = this.eachee.filter((el, i, arr) => arr.indexOf(el) === i);
+
+        },
+        buildPagination() {
+          let numberOfPage = Math.ceil(
+            this.filteredItems.length / this.pagination.itemPerPage
+          );
+          this.pagination.items = [];
+          for (var i = 0; i < numberOfPage; i++) {
+            this.pagination.items.push(i + 1);
+          }
+        },
+        searchInTheList4(searchText, currentPage) {
+          this.openSelectedlist = false;
+          if (_.isUndefined(searchText)) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined(currentPage)) {
+            this.selectPage(1);
+          } else {
+            this.selectPage(currentPage);
+          }
+        },
+        searchInTheList(searchText, currentPage) {
+          if (_.isUndefined(searchText)) {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return !v.selected;
+            });
+          } else {
+            this.filteredItems = _.filter(this.items, function (v, k) {
+              return (
+                (!v.selected &&
+                v.name.toLowerCase().indexOf(searchText.toLowerCase()) > -1 ) || (!v.selected &&
+                v.names.toLowerCase().indexOf(searchText.toLowerCase()) > -1 )
+              );
+            });
+          }
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined(currentPage)) {
+            this.selectPage(1);
+          } else {
+            this.selectPage(currentPage);
+          }
+        },
+        selectPage(item) {
+          this.pagination.currentPage = item;
+          let start = 0;
+          let end = 0;
+          if (this.pagination.currentPage < this.pagination.range - 2) {
+            start = 1;
+            end = start + this.pagination.range - 1;
+          } else if (
+            this.pagination.currentPage <= this.pagination.items.length &&
+            this.pagination.currentPage >
+            this.pagination.items.length - this.pagination.range + 2
+          ) {
+            start = this.pagination.items.length - this.pagination.range + 1;
+            end = this.pagination.items.length;
+          } else {
+            start = this.pagination.currentPage - 2;
+            end = this.pagination.currentPage + 2;
+          }
+          if (start < 1) {
+            start = 1;
+          }
+          if (end > this.pagination.items.length) {
+            end = this.pagination.items.length;
+          }
+
+          this.pagination.filteredItems = [];
+          for (var i = start; i <= end; i++) {
+            this.pagination.filteredItems.push(i);
+          }
+     
+          this.paginatedItems = this.filteredItems.filter((v, k) => {
+            return (
+              Math.ceil((k + 1) / this.pagination.itemPerPage) ==
+              this.pagination.currentPage
+            );
+          });
+        },
+        clearAllItem(recover) {
+          if(recover == 'recover'){
+            if(confirm("請確保當前版本已儲存，確定要回覆你所選的版本?")){
+              this.items = [];
+              items = [];
+              this.timeTable = [['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',]] ;
+              this.searchInTheList4(0, this.pagination.currentPage);
+              this.openDescription = false ;
+              this.selectedItems = [];
+              this.countcredit = 0;
+              this.addcourse = true;
+              this.CCtable = false;
+              this.exclude9999 = 9999 ;
+          }}else{
+            if(confirm("清除目前版本所有資料?")){
+              this.items = [];
+              items = [];
+              this.timeTable = [['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',],['','','','','','','','','','','','','','','',]] ;
+              this.searchInTheList4(0, this.pagination.currentPage);
+              this.openDescription = false ;
+              this.selectedItems = [];
+              this.countcredit = 0;
+              this.addcourse = true;
+              this.CCtable = false;
+              this.filteredItems = undefined;
+              this.exclude9999 = 9999 ;
+            }
+          }
+        },
+        branchselect(selectitem){
+          if(selectitem == 0){
+            }else if (selectitem == 1){
+              this.save();
+            }else if (selectitem == 2){
+              this.branchsave();
+            }else if (selectitem == 3){
+              this.branchimportswitchs();
+            }
+            document.getElementById("sel").options.selectedIndex = 0; //回到初始狀態
+            document.getElementById("sel").selectpicker('refresh');//對searchPayState這個下拉框進行重置重新整理
+        },
+        save(){
+             let savesput = {};
+             savesput.Name=prompt("請輸入分支名字", "");
+             if(savesput.Name != null){
+              savesput.thisitems = _.cloneDeep(this.items);
+              savesput.items = _.cloneDeep(items);
+              savesput.timeTable = _.cloneDeep(this.timeTable);
+              savesput.openDescription = _.cloneDeep(this.openDescription);
+              savesput.selectedItems = _.cloneDeep(this.selectedItems);
+              savesput.countcredit = _.cloneDeep(this.countcredit);
+              savesput.addcourse = _.cloneDeep(this.addcourse);
+              savesput.CCtable = _.cloneDeep(this.CCtable);
+              savesput.pagination = _.cloneDeep(this.pagination);
+              savesput.filteredItems = _.cloneDeep(this.filteredItems);
+              savesput.exclude9999 = this.exclude9999 ;
+              this.saves.push(savesput);
+            }
+        },
+        branchsave(){
+          let exportSaveFiles = '' ;
+           exportSaveFiles = JSON.stringify(this.saves);
+          let  dummy = document.createElement('input'),
+          text = exportSaveFiles;
+          document.body.appendChild(dummy);
+          dummy.value = text;
+          dummy.select();
+          document.execCommand('copy');
+          document.body.removeChild(dummy);
+          alert("已複製，請手動貼上至安全的地方");
+         },
+         branchimportfunction(){
+          if(confirm("嚴重警告，是否同意目前操作會取代系統所有資料")){
+           this.saves = [],
+            this.saves = JSON.parse(this.branchimport);
+            alert("匯入成功")
+            this.branchimportswitch = false;
+            this.branchimport = [] ;
+          }
+         },
+        recoversave(item){
+          if(confirm("目前版本將會版取代")){
+            this.clearAllItem('recover');
+            this.items =  _.cloneDeep(item.thisitems); 
+            items =  _.cloneDeep(item.items) ;
+            this.timeTable =  _.cloneDeep(item.timeTable);
+            this.openDescription  =  _.cloneDeep(item.openDescription) ;
+            this.selectedItems =  _.cloneDeep(item.selectedItems) ;
+            this.countcredit  =  _.cloneDeep(item.countcredit) ;
+            this.addcourse  =  _.cloneDeep(item.addcourse) ;
+            this.CCtable  =  _.cloneDeep(item.CCtable) ;
+            this.pagination  =  _.cloneDeep(item.pagination) ;
+            this.filteredItems  =  _.cloneDeep(item.filteredItems) ;
+            this.exclude9999 = item.exclude9999;
+            this.searchInTheList4(0, this.pagination.currentPage);
+        }},
+        remove(item){
+          if(confirm("是否要進行刪除分支?刪除後該分支不能還原")){
+            this.saves.$remove(item);
+          }
+        },
+        selectItem(item) {
+          this.addcourse = false;
+          if(this.timeTablefunc(item)== 0){
+            alert('與目前課表有衝突哦，若有中途加入新的資料，請務必取消目前所有已選取的項目，以解除衝突');
+            return ;
+          }; 
+
+          if(item.email == "****" && item.address == "****" && item.phone == "****" ){
+            alert("該資料AI 無法進行分析，請切換手動輸入模式分兩筆資料輸入")
+            return ;
+          }
+          this.eachCCs = [];
+          this.eachee = [];
+          item.selected = true;
+          item.selectedOutput = true;
+
+          if (item.email != "****"){
+            this.searchInTheList2(item.email, this.pagination.currentPage);
+          } else {
+            this.searchInTheList4(0, this.pagination.currentPage);
+          }
+
+          if (item.address != "****"){
+            this.searchInTheList2(item.address, this.pagination.currentPage);
+          } else {
+            this.searchInTheList4(0, this.pagination.currentPage);
+          }
+
+          if (item.phone != "****"){
+            this.searchInTheList2(item.phone, this.pagination.currentPage);
+          } else {
+            this.searchInTheList4(0, this.pagination.currentPage);
+          }
+          this.searchInTheList4(0, this.pagination.currentPage);
+           this.eachCCs = this.eachCCs.filter((el, i, arr) => arr.indexOf(el) === i);
+           item.conflict = this.eachCCs;
+
+          for (let i = 0; i < this.eachee.length; i++) {
+            this.eachee[i] = this.eachee[i].split(' ');
+          }
+
+            item.conflict2= this.eachee;
+           this.selectedItems.push(item);
+           this.countcredit =  this.countcredit + parseInt(item.credit);
+        },
+        removeSelectedItem(item) {
+
+          if(this.selectedItems.length <=  1){
+            this.addcourse = true;
+            this.CCtable = false;
+          }
+          let removeSelectedList = [] ;
+          
+          this.timeTableDelfunc(item);
+          item.selectedOutput = false;
+          item.selected = false;
+          
+          this.selectedItems.$remove(item);
+
+          for (let index = 0; index < this.selectedItems.length; index++) {
+          if(item.conflict !== this.selectedItems[index].conflict){
+              removeSelectedList.push(this.selectedItems[index].conflict);
+            }
+          }
+
+          removeSelectedList = [].concat.apply([], removeSelectedList);
+          removeSelectedList = removeSelectedList.filter((el, i, arr) => arr.indexOf(el) === i);
+          
+        
+          _.findKey(this.items, function(o) { 
+            if(o.name == item.name){
+              o.selected = false ;
+             }
+          });
+
+          this.filteredItems = _.filter(this.items, function (v, k) {
+            let search = v.name + ' ' + v.names;
+            for (let index = 0; index < item.conflict.length; index++) {
+              if(item.conflict[index].indexOf(search) > -1 ){ 
+                if(removeSelectedList.indexOf(item.conflict[index]) == -1){
+                  v.selected = false;
+                }
+              }
+            }
+            return !v.selected;
+          });
+
+          this.filteredItems.forEach(function (v, k) {
+            v.key = k + 1;
+          });
+          this.buildPagination();
+
+          if (_.isUndefined(this.pagination.currentPage)) {
+            this.selectPage(1);
+          } else {
+            this.selectPage(this.pagination.currentPage);
+          }
+
+          if(this.openSelectedlist == true){
+             this.openSelectedlist = false;
+             this.showAlreadySelect();
+          }
+          this.SCCouse(2);
+          this.countcredit =  this.countcredit - parseInt(item.credit);
+          if(item.timeExcludeShow == false || item.timeExcludeShow == true){
+            this.deleteItem(item,'delnoconfirm');
+          }
+        },
+        deleteItem(item,delnoconfirm) {
+          if(delnoconfirm == 'delnoconfirm'){
+            if(this.items.indexOf(item) == -1 ){
+              alert("發生錯誤找不到對應項目");
+              return ;
+            }else{
+              this.items.splice(this.items.indexOf(item),1);
+              this.selectedItems.$remove(item);
+            }
+            this.searchInTheList4(0, this.pagination.currentPage);
+            this.showAlreadySelect();  
+          }else{
+            if(confirm("確定刪除?" + item.name + ' '+  item.names )){
+              if(this.items.indexOf(item) == -1 ){
+                alert("發生錯誤找不到對應項目");
+                return ;
+              }else{
+                this.items.splice(this.items.indexOf(item),1);
+                this.selectedItems.$remove(item);
+                alert( item.name + ' '+  item.names + "刪除成功" );
+              }
+              this.showAlreadySelect();  
+              this.searchInTheList4(0, this.pagination.currentPage);
+            }
+          };
+        },
+        submitCourseExcel() {
+          for (var i = 0; i < XL_row_object.length; i++) {
+            XL_row_object[i].課程代號 = String(XL_row_object[i].課程代號)
+            XL_row_object[i].課程名稱 = String(XL_row_object[i].課程名稱)
+            XL_row_object[i].第一節 = String(XL_row_object[i].第一節)
+            XL_row_object[i].第二節 = String(XL_row_object[i].第二節)
+            XL_row_object[i].第三節 = String(XL_row_object[i].第三節)
+            XL_row_object[i].學分 = String(XL_row_object[i].學分)
+            XL_row_object[i].類型 = String(XL_row_object[i].類型)
+
+            if (
+              XL_row_object[i].課程代號 == undefined ||
+              XL_row_object[i].課程代號 == null ||
+              XL_row_object[i].課程代號 == ""
+            ) {
+              alert("請輸入課程代號");
+              return;
+            }
+
+            if (
+              XL_row_object[i].課程名稱 == undefined ||
+              XL_row_object[i].課程名稱 == null ||
+              XL_row_object[i].課程名稱 == ""
+            ) {
+              alert("請輸入課程名稱");
+              return;
+            }
+
+            if (
+              XL_row_object[i].第一節 == undefined ||
+              XL_row_object[i].第一節 == null ||
+              XL_row_object[i].第一節 == ""
+            ) {
+              alert("至少輸入一節課程");
+              return;
+            }
+
+            if (
+              XL_row_object[i].第二節 == undefined ||
+              XL_row_object[i].第二節 == null ||
+              XL_row_object[i].第二節 == ""
+            ) {
+              XL_row_object[i].第二節 = "****";
+            }
+
+            if (
+              XL_row_object[i].第三節 == undefined ||
+              XL_row_object[i].第三節 == null ||
+              XL_row_object[i].第三節 == ""
+            ) {
+              XL_row_object[i].第三節 = "****";
+            }
+            
+            if (
+              XL_row_object[i].學分 == undefined ||
+              XL_row_object[i].學分 == null ||
+              XL_row_object[i].學分 == ""
+            ) {
+              XL_row_object[i].學分 = "****";
+            }
+            
+
+
+            XL_row_object[i].第一節 = XL_row_object[i].第一節.replace(/\s*/g,"");
+            XL_row_object[i].第二節 = XL_row_object[i].第二節.replace(/\s*/g,"");
+            XL_row_object[i].第三節 = XL_row_object[i].第三節.replace(/\s*/g,"");
+            XL_row_object[i].學分 = XL_row_object[i].學分.replace(/\s*/g,"");
+            XL_row_object[i].類型 = XL_row_object[i].類型.replace(/\s*/g,"");
+
+            this.items.push({
+              names: XL_row_object[i].課程名稱,
+              ssn: chance.ssn(), // SSN as person ID
+              name: XL_row_object[i].課程代號,
+              email: XL_row_object[i].第一節,
+              address: XL_row_object[i].第二節,
+              phone: XL_row_object[i].第三節,
+              credit: XL_row_object[i].學分,
+              selected: false,
+              selectedOutput: false,
+              lessonType : XL_row_object[i].類型,
+            });
+          }
+          this.searchInTheList4(0, this.pagination.currentPage);
+          alert("已增加資料");
+          document.getElementById('fileUploader').value = '';
+          XL_row_object = '';
+        },
+      },
+    });
+  </script>
+</body>
+
+</html>

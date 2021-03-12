@@ -1,0 +1,48 @@
+pop、push、shift和unshift這四種方法之中
+
+push() 方法   //+
+向陣列尾端新增一個或多個元素，並return新的長度
+
+pop() 方法   //- 最後的元素
+pop()和push()相反，作用為刪除陣列最後一個元素，把陣列長度減1，並return被刪除元素的值。若為空陣列，則該方法不改變陣列，return undefine。
+
+shift() 方法 //  - 開頭元素
+和unshift相法，是進行刪除陣列元素，同樣地:若陣列是空的則return undefine
+
+unshift() 方法  // + 開頭元素
+unshift則是向陣列的開頭新增一個或多個元素，並且return新的長度
+
+指定元素把變數放在()內
+item.splice(1,1)
+
+
+
+changejs 隨機數API
+
+物件是不能直接用 = 複製到另一個變數
+https://larry850806.github.io/2016/09/20/shallow-vs-deep-copy/
+
+
+vue select 的option 是不能直接綁定v-on click 的
+
+ <div class="select">
+      <select @change="branchselect(branchselect_value)" v-model="branchselect_value" >
+        <option @change="save()" v-bind:value="1.1" >1</option>
+        <option @change="branchsave()" v-bind:value="2.2" >2</option>
+        <option @change="branchsave()" v-bind:value="3.3" >3<a class="button is-success" v-on:click="branchimportswitchs()">
+          分支匯入
+        </a></option>
+      </select>
+    </div>
+
+
+要綁定在select  用 @change  
+
+
+
+
+select 點選後回到默認值
+
+  document.getElementById("sel").options.selectedIndex = 0; //回到初始狀態
+   document.getElementById("sel").selectpicker('refresh');//對se
+

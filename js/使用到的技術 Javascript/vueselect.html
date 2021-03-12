@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>.
+
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-select/3.10.8/vue-select.js" integrity="sha512-U4EVikrI06wvpOhiQ9km3JlHjiNefS03aGAEKjr3hB6qh+C+3cdgiFaWCL9THkqg4nrJ3EgP/aRxh9bpDxYbIg==" crossorigin="anonymous"></script>
+    <link rel="stylesheet"
+    href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:600">
+    <link rel="stylesheet"
+    href="https://unpkg.com/vue-select/dist/vue-select.css">
+    
+    <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.css">
+    
+    
+
+
+</head>
+<body>
+    <div id="app">
+        <h1>Vue Select Check Boxes</h1>
+        <v-select 
+          multiple
+          v-model="selected"
+          :options="options"
+          :reduce="item => item.code"
+          :closeOnSelect="false"
+        >
+          <template v-slot:option="option">
+            <span>
+              <i 
+                class="fa" 
+                :class="[selected.some(code => code === option.code) ? 'fa-check-square-o' : 'fa-square-o']"></i>
+              {{ option.label }} - {{ option.code }}
+            </span>
+          </template>
+        </v-select>
+        <pre>{{selected}}</pre>
+      </div>
+
+      <style>
+   body {
+  font-family: 'Source Sans Pro', 'Helvetica Neue', Arial, sans-serif;
+  text-rendering: optimizelegibility;
+  -moz-osx-font-smoothing: grayscale;
+  -moz-text-size-adjust: none;
+}
+
+h1,.muted {
+  color: #2c3e5099;
+}
+
+h1 {
+  font-size: 26px;
+  font-weight: 600;
+}
+
+#app {
+  max-width: 30em;
+  margin: 1em auto;
+}
+      </style>
+
+
+<script>
+  Vue.component('v-select', VueSelect.VueSelect)
+
+new Vue({
+  el: '#app',
+  data: {
+   selected: [],
+   options: [
+      {code: 'CA', label: 'Canada'},
+      {code: 'MX', label: 'Mexico'},
+      {code: 'US', label: 'United States'}     
+    ]
+  },
+  methods: {
+    doSelect(options) {}
+  }
+})
+
+
+</script>
+</body>
+</html>
