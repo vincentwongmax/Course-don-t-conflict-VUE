@@ -1621,6 +1621,11 @@
           }
         },
         selectItem(item) {
+          if(this.saves.length== 0 )
+          {
+            alert("當前無建立任何分支，請先行建立分支");
+            this.save();
+          }
           this.addcourse = false;
           if(this.timeTablefunc(item)== 0){
             alert('與目前課表有衝突哦，若有中途加入新的資料，請務必取消目前所有已選取的項目，以解除衝突');
