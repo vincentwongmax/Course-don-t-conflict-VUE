@@ -257,12 +257,14 @@
       </div>
 
       <br v-if="conf">
+      
     <nav class="pagination m-pagination">
-      <a class="button is-danger is-outlined" v-on:click="clearAllItem()">清除所有資料</a>
-      <a v-if="openSelectedlist" class="button is-info is-outlined" v-on:click="searchInTheList4()">顯示所有可選資料</a>
+      
+      <a class="button is-danger is-outlined" v-on:click="clearAllItem()">清除資料</a>
+      <a v-if="openSelectedlist" class="button is-info is-outlined" v-on:click="searchInTheList4()">顯示可選資料</a>
       <a v-if="!openSelectedlist" class="button is-success is-outlined" v-on:click="showAlreadySelect()">顯示已選取的課表/時間表</a>
-      <button v-if="openSelectedlist" class="button is-warning is-outlined" v-on:click="exportSaveFile()">匯出已選課表</button>
-      <button v-if="!openSelectedlist" class="button is-warning is-secondary" v-on:click="exportSaveFile()">匯出所有已匯入的資料</button>
+      <button v-if="openSelectedlist" class="button is-warning is-outlined" v-on:click="exportSaveFile()">匯出已選課表(EXCEL)</button>
+      <button v-if="!openSelectedlist" class="button is-warning is-secondary" v-on:click="exportSaveFile()">匯出已匯入的資料(EXCEL)</button>
       
       <br v-if="openDescription" ><br v-if="openDescription" >
       <A1 v-if="openDescription" ><strong > 以下表格資料為 <a style="color: crimson;">隨機生成</a>，其生成資料為供使用者測試用，請按<a style="color: indianred;" v-on:click="clearAllItem()" >清除所有資料按鈕</a>後使用</strong></A1>
@@ -1573,6 +1575,10 @@
             }
         },
         branchsave(){
+          if(this.saves.length == 0){
+            alert("目前沒有任何分支，請建立分支再進行匯出");
+            return 
+          }
           let exportSaveFiles = '' ;
            exportSaveFiles = JSON.stringify(this.saves);
           let  dummy = document.createElement('input'),
@@ -1582,7 +1588,7 @@
           dummy.select();
           document.execCommand('copy');
           document.body.removeChild(dummy);
-          alert("已複製，請手動貼上至安全的地方");
+          alert("成功複製，請手動貼上至安全的地方(例如: WORD丶純文字記事本)");
          },
          branchimportfunction(){
           if(confirm("嚴重警告，是否同意目前操作會取代系統所有資料")){
