@@ -8,6 +8,10 @@
 
 
 ## DEMO:  
-正式伺服器: https://coursefcu.ga
+
+正式伺服器: https://vincentwongmax.github.io/Course-don-t-conflict-VUE/
+
+
+(舊)伺服器(即將過期): https://coursefcu.ga
 
 
