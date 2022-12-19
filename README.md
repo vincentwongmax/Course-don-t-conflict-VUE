@@ -9,5 +9,7 @@
 
 ## DEMO:  
 
-永久正式伺服器: https://vincentwongmax.github.io/Course-don-t-conflict-VUE/
+https://vincentwongmax.github.io/Course-don-t-conflict-VUE/
+
+
 
